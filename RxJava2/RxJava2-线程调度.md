@@ -563,3 +563,9 @@ public NewThreadWorker(ThreadFactory threadFactory) {
 }
 ```
 在这里做到了线程的调度，其中太就不去追究了，到这里基本上就完成了线程的调度。
+
+
+
+放一张图，便于理解
+
+![无标题](http://static.zybuluo.com/xiey/ecbfxpo2yuujo8b9fvsecr4u/%E6%97%A0%E6%A0%87%E9%A2%98.png)
