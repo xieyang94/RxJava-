@@ -1,0 +1,775 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>RxJava2-线程调度 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    <link rel="prev" href="RxJava2的Disposable.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../Rxjava1/">
+            
+                <a href="../Rxjava1/">
+            
+                    
+                    RxJava1
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="../RxJava1/RxJava1的基本使用和基本原理.html">
+            
+                <a href="../RxJava1/RxJava1的基本使用和基本原理.html">
+            
+                    
+                    RxJava1的基本使用和基本原理
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    RxJava2
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.3.1" data-path="RxJava2的基本使用和基本原理.html">
+            
+                <a href="RxJava2的基本使用和基本原理.html">
+            
+                    
+                    RxJava2的基本使用和基本原理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.2" data-path="RxJava2的Disposable.html">
+            
+                <a href="RxJava2的Disposable.html">
+            
+                    
+                    RxJava2的Disposable
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.3.3" data-path="RxJava2-线程调度.html">
+            
+                <a href="RxJava2-线程调度.html">
+            
+                    
+                    RxJava2-线程调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >RxJava2-线程调度</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="rxjava2-&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;">RxJava2-&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;</h1>
+<p>RxJava2&#x4E2D;&#x7684;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#x4E3B;&#x8981;&#x7528;&#x5230;subscribeOn/observeOn</p>
+<p>&#x4ECE;&#x4E00;&#x4E2A;&#x4F7F;&#x7528;&#x51FA;&#x53D1;</p>
+<pre><code>Observable
+                .create(new ObservableOnSubscribe&lt;Integer&gt;() {
+                    @Override
+                    public void subscribe(ObservableEmitter&lt;Integer&gt; emitter) {
+                        emitter.onNext(22245);
+//                        emitter.onComplete();
+//                        emitter.onError(null);
+                        emitter.onNext(2);
+                        emitter.onNext(2);
+
+                        Log.i(&quot;ccer&quot;, &quot;================currentThread name: &quot; + Thread.currentThread().getName());
+                    }
+                })
+                .map(new Function&lt;Integer, String&gt;() {
+                    @Override
+                    public String apply(Integer integer) throws Exception {
+                        return &quot;&quot; + integer;
+                    }
+                })
+                .map(new Function&lt;String, String&gt;() {
+                    @Override
+                    public String apply(String s) throws Exception {
+                        return &quot;&#x6211;&#x662F;&#x524D;&#x7F00;&quot; + s;
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer&lt;String&gt;() {
+
+                    private Disposable mDisposable;
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        mDisposable = d;
+                        Log.i(&quot;ccer&quot;, &quot;========================onSubscribe&quot; + d);
+                    }
+
+                    @Override
+                    public void onNext(String s) {
+                        Log.i(&quot;ccer&quot;, &quot;========================onNext&quot; + s);
+                        mDisposable.dispose();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.i(&quot;ccer&quot;, &quot;========================onError&quot; + e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.i(&quot;ccer&quot;, &quot;========================onComplete&quot;);
+                    }
+                });
+</code></pre><p>&#x8FD9;&#x4E2A;&#x4F8B;&#x5B50;&#x6CA1;&#x6709;&#x4EC0;&#x4E48;&#x5B9E;&#x7528;&#x6027;&#xFF0C;&#x4E3B;&#x8981;&#x662F;&#x4E3A;&#x4E86;&#x8BF4;&#x660E;&#x6D41;&#x7A0B;&#x3002;</p>
+<p>&#x5148;&#x8BF4;&#x4E00;&#x4E9B;&#x7C7B;&#x540D;&#xFF0C;&#x56E0;&#x4E3A;&#x5F88;&#x591A;Rxjava2&#x4E2D;&#x6709;&#x5F88;&#x591A;&#x540D;&#x5B57;&#x4E0D;&#x592A;&#x597D;&#x8BB0;&#xFF0C;&#x6240;&#x4EE5;&#x5148;&#x63D0;&#x524D;&#x8BF4;&#x4E00;&#x4E0B; &#xFF0C;&#x8FD9;&#x6837;&#x63A5;&#x4E0B;&#x6765;&#x770B;&#x4E0D;&#x81F3;&#x4E8E;&#x6DF7;&#x6DC6;</p>
+<p>RxJava2&#x7684;&#x94FE;&#x5F0F;&#x4F7F;&#x7528;&#x5C31;&#x5982;&#x540C;&#x4E00;&#x4E2A;&#x4E8B;&#x4EF6;&#x6D41;&#xFF0C;&#x4ECE;&#x4E0A;&#x5F80;&#x4E0B;&#x6D41;&#xFF0C;&#x5F53;&#x7136;&#x8FD9;&#x662F;&#x4EE3;&#x7801;&#x8868;&#x8C61;&#x4E0A;&#x770B;&#x5230;&#x7684;&#x3002;</p>
+<ul>
+<li>Observable&#xFF1A;&#x88AB;&#x89C2;&#x5BDF;&#x8005;&#xFF1B;&#x8FD9;&#x4E2A;&#x662F;&#x4E8B;&#x4EF6;&#x6D41;&#x7684;&#x8D77;&#x70B9;&#x3002;&#x4ED6;&#x662F;&#x4E00;&#x4E2A;&#x62BD;&#x8C61;&#x7C7B;&#xFF0C;&#x662F;&#x5927;&#x90E8;&#x5206;&#x4E8B;&#x4EF6;&#x6D41;&#x7684;&#x9F3B;&#x7956;&#x3002;&#xFF08;&#x8FD8;&#x6709;Flowable&#x5462;&#xFF0C;&#x8FD8;&#x6709;&#x6211;&#x4E0D;&#x77E5;&#x9053;&#x7684;&#x5462;&#xFF0C;&#x8FD8;&#x6709;&#x7B49;&#x7B49;&#x5462;&#xFF09;</li>
+<li>ObservableSource&#xFF1A;&#x63A5;&#x53E3;&#xFF0C;&#x8FD9;&#x4E2A;&#x91CC;&#x9762;&#x5C31;&#x4E00;&#x4E2A;&#x8BA2;&#x9605;&#x65B9;&#x6CD5;subscribe&#xFF0C;&#x7528;&#x6765;&#x8BA2;&#x9605;&#x7684;&#xFF0C;Observable&#x5B9E;&#x73B0;&#x4E86;&#x8FD9;&#x4E2A;&#x63A5;&#x53E3;</li>
+<li>ObservableOnSubscribe&#xFF1A;&#x4E8B;&#x4EF6;&#x56DE;&#x8C03;&#xFF1B;&#x63A5;&#x53E3;&#xFF0C;&#x63A5;&#x53E3;&#x65B9;&#x6CD5;&#x662F;subscribe&#xFF0C;&#x8FD9;&#x4E2A;&#x540D;&#x5B57;&#x8D77;&#x5F97;&#x5F88;&#x8BA9;&#x4EBA;&#x7591;&#x60D1;&#xFF0C;&#x548C;&#x8BA2;&#x9605;&#x65B9;&#x6CD5;&#x4E00;&#x4E2A;&#x540D;&#x5B57;&#xFF0C;&#x53EA;&#x662F;&#x53C2;&#x6570;&#x4E0D;&#x540C;</li>
+<li>ObservableEmitter&#xFF1A;&#x53D1;&#x5C04;&#x5668;&#x63A5;&#x53E3;&#xFF0C;&#x7EE7;&#x627F;&#x81EA;Emitter&#xFF1B;</li>
+<li>ObservableCreate&#xFF1A;Observable&#x5BF9;&#x5E94;&#x7684;&#x88AB;&#x89C2;&#x5BDF;&#x8005;</li>
+<li>ObservableSubscribeOn&#xFF1A;subscribeOn&#x5BF9;&#x5E94;&#x7684;&#x88AB;&#x89C2;&#x5BDF;&#x8005;</li>
+<li>ObservableObserveOn&#xFF1A;observeOn&#x5BF9;&#x5E94;&#x7684;&#x88AB;&#x89C2;&#x5BDF;&#x8005;</li>
+<li>CreateEmitter&#xFF1A;Observable&#x5BF9;&#x5E94;&#x7684;&#x89C2;&#x5BDF;&#x8005;</li>
+<li>SubscribeOnObserver&#xFF1A;subscribeOn&#x5BF9;&#x5E94;&#x7684;&#x89C2;&#x5BDF;&#x8005;</li>
+<li>ObserveOnObserver&#xFF1A;observeOn&#x5BF9;&#x5E94;&#x7684;&#x89C2;&#x5BDF;&#x8005;</li>
+</ul>
+<blockquote>
+<p>&#x53EF;&#x4EE5;&#x4ED4;&#x7EC6;&#x770B;&#x770B;&#xFF0C;&#x4E0A;&#x9762;&#x7684;&#x540D;&#x5B57;&#x5F88;&#x6709;&#x89C4;&#x5F8B;&#x7684;&#xFF0C;&#x57FA;&#x672C;&#x4E0A;&#x88AB;&#x89C2;&#x5BDF;&#x8005;&#x90FD;&#x662F;&#x4EE5;Observable&#x5F00;&#x5934;&#xFF0C;&#x7136;&#x540E;&#x540E;&#x9762;&#x5BF9;&#x5E94;&#x7740;&#x64CD;&#x4F5C;&#x7B26;&#x540D;&#x79F0;&#xFF0C;&#x800C;&#x89C2;&#x5BDF;&#x8005;&#x57FA;&#x672C;&#x4E0A;&#x90FD;&#x662F;&#x4EE5;&#x64CD;&#x4F5C;&#x7B26;&#x5F00;&#x5934;&#x4EE5;Observer&#x7ED3;&#x5C3E;</p>
+</blockquote>
+<p>&#x8FD9;&#x6837;&#x63A5;&#x4E0B;&#x6765;&#x770B;&#x6E90;&#x7801;&#x5C31;&#x4E0D;&#x4F1A;&#x5F88;&#x6DF7;&#x4E71;&#x4E86;</p>
+<pre><code>@CheckReturnValue
+@SchedulerSupport(SchedulerSupport.NONE)
+public static &lt;T&gt; Observable&lt;T&gt; create(ObservableOnSubscribe&lt;T&gt; source){
+    ObjectHelper.requireNonNull(source, &quot;source is null&quot;);
+    return RxJavaPlugins.onAssembly(new ObservableCreate&lt;T&gt;(source));
+}
+</code></pre><pre><code>public ObservableCreate(ObservableOnSubscribe&lt;T&gt; source) {
+    this.source = source;
+}
+</code></pre><pre><code>public abstract class Observable&lt;T&gt; implements ObservableSource&lt;T&gt; {
+    ...
+}
+</code></pre><pre><code>@NonNull
+public static &lt;T&gt; Observable&lt;T&gt; onAssembly(@NonNull Observable&lt;T&gt; source) {
+    Function&lt;? super Observable, ? extends Observable&gt; f = onObservableAssembly;
+    if (f != null) {
+        return apply(f, source);
+    }
+    return source;
+}
+</code></pre><p>create&#x64CD;&#x4F5C;&#x7B26;&#x4E2D;&#x4F20;&#x5165;&#x4E86;&#x4E00;&#x4E2A;ObservableOnSubscribe&#x53C2;&#x6570;&#xFF0C;&#x56E0;&#x4E3A;Observable&#x4E5F;&#x5B9E;&#x73B0;&#x4E86;&#x8FD9;&#x4E2A;&#x63A5;&#x53E3;&#xFF0C;&#x6240;&#x4EE5;&#x4E5F;&#x53EF;&#x4EE5;&#x8BF4;&#x4ED6;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x88AB;&#x89C2;&#x5BDF;&#x8005;&#xFF1B;&#x5BF9;&#x4E8E;&#x4E00;&#x4E9B;&#x964C;&#x751F;&#x7684;&#x4EE3;&#x7801;&#x6211;&#x4EEC;&#x5148;&#x5FFD;&#x7565;&#xFF0C;&#x4F8B;&#x5982;&#xFF1A;RxJavaPlugins.onAssembly&#xFF1B;
+&#x5728;create&#x4E2D;&#x5C31;&#x662F;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;ObservableCreate&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x5F53;&#x524D;&#x7684;&#x88AB;&#x89C2;&#x5BDF;&#x8005;ObservableOnSubscribe&#xFF08;&#x4E8B;&#x4EF6;&#x6E90;&#x5934;&#xFF09;&#x4F20;&#x8FDB;&#x53BB;&#x4E86;&#xFF0C;&#x8FD9;&#x65F6;&#x5728;ObservableCreate&#x4E2D;&#x6301;&#x6709;&#x4E86;ObservableOnSubscribe&#xFF08;&#x4E8B;&#x4EF6;&#x6E90;&#x5934;&#xFF09;&#x7684;&#x5F15;&#x7528;--source&#xFF0C;&#x7136;&#x540E;&#x5C06;ObservableCreate&#x8FD4;&#x56DE;&#x3002;</p>
+<pre><code>@CheckReturnValue
+@SchedulerSupport(SchedulerSupport.NONE)
+public final &lt;R&gt; Observable&lt;R&gt; map(Function&lt;? super T, ? extends R&gt; mapper) {
+    ObjectHelper.requireNonNull(mapper, &quot;mapper is null&quot;);
+    return RxJavaPlugins.onAssembly(new ObservableMap&lt;T, R&gt;(this, mapper));
+}
+</code></pre><pre><code>public ObservableMap(ObservableSource&lt;T&gt; source, Function&lt;? super T, ? extends U&gt; function) {
+    super(source);
+    this.function = function;
+}
+</code></pre><p>map&#x4E2D;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;ObservableMap&#xFF0C;&#x540C;&#x65F6;&#x6301;&#x6709;&#x4E0A;&#x4E00;&#x6B65;&#x4E2D;&#x7684;&#x88AB;&#x89C2;&#x5BDF;&#x8005;(this)&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x4E0A;&#x4E00;&#x6B65;&#x4E2D;&#x8FD4;&#x56DE;&#x7684;ObservableCreate&#xFF0C;&#x5E76;&#x6301;&#x6709;&#x81EA;&#x5DF1;&#x4F20;&#x8FDB;&#x6765;&#x7684;Function&#xFF0C;&#x7136;&#x540E;&#x5C06;ObservableMap&#x8FD4;&#x56DE;&#x3002;</p>
+<p>&#x518D;&#x6765;&#x4E00;&#x6B21;map&#xFF0C;&#x5219;&#x53C8;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;ObservableMap&#xFF0C;&#x540C;&#x65F6;&#x6301;&#x6709;&#x4E0A;&#x4E00;&#x6B65;&#x4E2D;&#x7684;&#x88AB;&#x89C2;&#x5BDF;&#x8005;(this)&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x4E0A;&#x4E00;&#x6B65;&#x4E2D;&#x8FD4;&#x56DE;&#x7684;ObservableMap&#xFF0C;&#x5E76;&#x6301;&#x6709;&#x81EA;&#x5DF1;&#x4F20;&#x8FDB;&#x6765;&#x7684;Function&#xFF0C;&#x7136;&#x540E;&#x5C06;ObservableMap&#x8FD4;&#x56DE;&#x3002;</p>
+<pre><code>@CheckReturnValue
+@SchedulerSupport(SchedulerSupport.CUSTOM)
+public final Observable&lt;T&gt; subscribeOn(Scheduler scheduler) {
+    ObjectHelper.requireNonNull(scheduler, &quot;scheduler is null&quot;);
+    return RxJavaPlugins.onAssembly(new ObservableSubscribeOn&lt;T&gt;(this, scheduler));
+}
+</code></pre><pre><code>public ObservableSubscribeOn(ObservableSource&lt;T&gt; source, Scheduler scheduler) {
+    super(source);
+    this.scheduler = scheduler;
+}
+</code></pre><p>&#x5728;subscribeOn&#x4E2D;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;ObservableSubscribeOn&#xFF0C;&#x540C;&#x65F6;&#x6301;&#x6709;&#x4E0A;&#x4E00;&#x6B65;&#x4E2D;&#x7684;&#x88AB;&#x89C2;&#x5BDF;&#x8005;&#xFF08;this&#xFF09;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x4E0A;&#x4E00;&#x6B65;&#x4E2D;&#x8FD4;&#x56DE;&#x7684;ObservableMap&#xFF0C;&#x5E76;&#x6301;&#x6709;&#x4F20;&#x8FDB;&#x6765;&#x7684;Scheduler&#xFF0C;&#x7136;&#x540E;&#x5C06;ObservableSubscribeOn&#x8FD4;&#x56DE;&#x3002;</p>
+<p>&#x518D;&#x6765;&#x4E00;&#x6B21;subscribeOn&#xFF1B;&#x5728;subscribeOn&#x4E2D;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;ObservableSubscribeOn&#xFF0C;&#x540C;&#x65F6;&#x6301;&#x6709;&#x4E0A;&#x4E00;&#x6B65;&#x4E2D;&#x7684;&#x88AB;&#x89C2;&#x5BDF;&#x8005;&#xFF08;this&#xFF09;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x4E0A;&#x4E00;&#x6B65;&#x4E2D;&#x8FD4;&#x56DE;&#x7684;ObservableSubscribeOn&#xFF0C;&#x5E76;&#x6301;&#x6709;&#x4F20;&#x8FDB;&#x6765;&#x7684;Scheduler&#xFF0C;&#x7136;&#x540E;&#x5C06;ObservableSubscribeOn&#x8FD4;&#x56DE;&#x3002;</p>
+<pre><code>@CheckReturnValue
+@SchedulerSupport(SchedulerSupport.CUSTOM)
+public final Observable&lt;T&gt; observeOn(Scheduler scheduler) {
+    return observeOn(scheduler, false, bufferSize());
+}
+</code></pre><pre><code>@CheckReturnValue
+@SchedulerSupport(SchedulerSupport.CUSTOM)
+public final Observable&lt;T&gt; observeOn(Scheduler scheduler, boolean delayError, int bufferSize) {
+    ObjectHelper.requireNonNull(scheduler, &quot;scheduler is null&quot;);
+    ObjectHelper.verifyPositive(bufferSize, &quot;bufferSize&quot;);
+    return RxJavaPlugins.onAssembly(new ObservableObserveOn&lt;T&gt;(this, scheduler, delayError, bufferSize));
+}
+</code></pre><pre><code>public ObservableObserveOn(ObservableSource&lt;T&gt; source, Scheduler scheduler, boolean delayError, int bufferSize) {
+    super(source);
+    this.scheduler = scheduler;
+    this.delayError = delayError;
+    this.bufferSize = bufferSize;
+}
+</code></pre><p>&#x5728;observeOn&#x4E2D;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;ObservableObserveOn&#xFF0C;&#x540C;&#x65F6;&#x6301;&#x6709;&#x4E0A;&#x4E00;&#x6B65;&#x4E2D;&#x7684;&#x88AB;&#x89C2;&#x5BDF;&#x8005;&#xFF08;this&#xFF09;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x4E0A;&#x4E00;&#x6B65;&#x4E2D;&#x8FD4;&#x56DE;&#x7684;ObservableSubscribeOn&#xFF0C;&#x5E76;&#x6301;&#x6709;&#x4F20;&#x8FDB;&#x6765;&#x7684;Scheduler&#xFF0C;&#x540C;&#x65F6;&#x5C06;ObservableObserveOn&#x8FD4;&#x56DE;&#x3002;</p>
+<p>&#x5230;&#x76EE;&#x524D;&#x4E3A;&#x6B62;&#xFF0C;&#x4E00;&#x76F4;&#x90FD;&#x6BD4;&#x8F83;&#x98CE;&#x5E73;&#x6D6A;&#x9759;&#xFF0C;&#x56E0;&#x4E3A;&#x662F;&#x641E;&#x4E8B;&#x60C5;&#x7684;&#x8BA2;&#x9605;&#x8FD8;&#x6CA1;&#x6765;&#xFF1B;&#x4ED6;&#x6765;&#x4E86;</p>
+<pre><code>@SchedulerSupport(SchedulerSupport.NONE)
+@Override
+public final void subscribe(Observer&lt;? super T&gt; observer) {
+    ObjectHelper.requireNonNull(observer, &quot;observer is null&quot;);
+    try {
+        observer = RxJavaPlugins.onSubscribe(this, observer);
+
+        ObjectHelper.requireNonNull(observer, &quot;Plugin returned null Observer&quot;);
+
+        subscribeActual(observer);
+    } catch (NullPointerException e) { // NOPMD
+        throw e;
+    } catch (Throwable e) {
+        Exceptions.throwIfFatal(e);
+        // can&apos;t call onError because no way to know if a Disposable has been set or not
+        // can&apos;t call onSubscribe because the call might have set a Subscription already
+        RxJavaPlugins.onError(e);
+
+        NullPointerException npe = new NullPointerException(&quot;Actually not, but can&apos;t throw other exceptions due to RS&quot;);
+        npe.initCause(e);
+        throw npe;
+    }
+}
+</code></pre><p>&#x8FD9;&#x91CC;&#x9762;&#x5C31;&#x6355;&#x6349;&#x4E00;&#x884C;&#x4EE3;&#x7801;</p>
+<pre><code>@SchedulerSupport(SchedulerSupport.NONE)
+@Override
+public final void subscribe(Observer&lt;? super T&gt; observer) {
+    ...
+    subscribeActual(observer);
+    ...
+}
+</code></pre><p>&#x5728;Observable&#x4E2D;&#xFF0C;subscribeActual&#x662F;&#x4E2A;&#x62BD;&#x8C61;&#x65B9;&#x6CD5;&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x4E2A;subscribe&#x662F;&#x7531;&#x4E0A;&#x4E00;&#x6B65;&#x8FD4;&#x56DE;&#x7684;ObservableObserveOn&#x53D1;&#x51FA;&#x7684;&#xFF0C;&#x6240;&#x4EE5;&#x8C03;&#x7528;&#x7684;&#x5C31;&#x662F;&#x4ED6;&#x7684;subscribeActual&#x5B9E;&#x73B0;&#x65B9;&#x6CD5;</p>
+<pre><code>@Override
+protected void subscribeActual(Observer&lt;? super T&gt; observer) {
+    if (scheduler instanceof TrampolineScheduler) {
+        source.subscribe(observer);
+    } else {
+        Scheduler.Worker w = scheduler.createWorker();
+
+        source.subscribe(new ObserveOnObserver&lt;T&gt;(observer, w, delayError, bufferSize));
+    }
+}
+</code></pre><pre><code>@NonNull
+public static Scheduler trampoline() {
+    return TRAMPOLINE;
+}
+</code></pre><pre><code>static {
+    ...
+    TRAMPOLINE = TrampolineScheduler.instance();
+    ...
+}
+</code></pre><pre><code>ObserveOnObserver(Observer&lt;? super T&gt; actual, Scheduler.Worker worker, boolean delayError, int bufferSize) {
+    this.actual = actual;
+    this.worker = worker;
+    this.delayError = delayError;
+    this.bufferSize = bufferSize;
+}
+</code></pre><p>&#x8FD9;&#x91CC;&#x7684;source&#x5C31;&#x662F;&#x5F53;&#x524D;&#x88AB;&#x89C2;&#x5BDF;&#x8005;ObservableObserveOn&#x6240;&#x6301;&#x6709;&#x7684;&#x4ED6;&#x7684;&#x4E0A;&#x4E00;&#x6B65;&#x8FD4;&#x56DE;&#x7684;&#x88AB;&#x89C2;&#x5BDF;&#x8005;ObservableSubscribeOn&#xFF0C;scheduler&#x662F;observeOn&#x4E2D;&#x4F20;&#x8FDB;&#x6765;&#x7684;&#xFF1B;
+&#x5148;&#x5224;&#x65AD;&#x8FD9;&#x4E2A;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#xFF08;Schedulers.trampoline()&#x719F;&#x6089;&#x5427;&#xFF01;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#xFF09;&#x6CA1;&#x6709;&#x53D1;&#x751F;&#x4EFB;&#x4F55;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#x76F4;&#x63A5;&#x8BA2;&#x9605;&#xFF0C;&#x5426;&#x5219;&#x5C31;&#x53BB;&#x505A;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#xFF0C;&#x5F53;&#x524D;&#x7684;&#x6848;&#x4F8B;&#x662F;&#x8C03;&#x5EA6;&#x5230;&#x4E3B;&#x7EBF;&#x7A0B;&#xFF08;&#x4E0A;&#x9762;&#x7684;demo&#xFF09;&#xFF0C;&#x6240;&#x4EE5;&#x5C31;&#x5230;&#x4E86;&#x90A3;&#x4E2A;else&#x4E2D;&#xFF0C;&#x9996;&#x5148;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;Worker&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x8FD9;&#x4E2A;&#x539F;&#x59CB;Observer&#x548C;worker&#x4F20;&#x5230;ObserveOnObserver&#x4E2D;&#x6301;&#x6709;&#x3002;</p>
+<pre><code>@Override
+public void subscribeActual(final Observer&lt;? super T&gt; s) {
+    final SubscribeOnObserver&lt;T&gt; parent = new SubscribeOnObserver&lt;T&gt;(s);
+
+    s.onSubscribe(parent);
+
+    parent.setDisposable(scheduler.scheduleDirect(new SubscribeTask(parent)));
+}
+</code></pre><p>&#x518D;&#x770B;&#x770B;&#x8FD9;&#x4E2A;&#x8BA2;&#x9605;&#x65B9;&#x6CD5;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;ObservableSubscribeOn&#x4E2D;&#x7684;subscribeActual&#x65B9;&#x6CD5;,&#x5148;&#x5BF9;&#x4E0A;&#x4E00;&#x6B65;&#x4F20;&#x8FC7;&#x6765;&#x7684;ObserveOnObserver&#x8FDB;&#x884C;&#x5305;&#x88C5;&#x6210;&#x4E86;SubscribeOnObserver&#xFF0C;&#x7136;&#x540E;&#x6267;&#x884C;&#x4E86;&#x4ED6;&#x7684;onSubscribe(parent)&#x65B9;&#x6CD5;&#xFF0C;&#x5230;&#x76EE;&#x524D;&#x4E3A;&#x6B62;&#x8FD8;&#x6CA1;&#x6709;&#x53D1;&#x751F;&#x4EFB;&#x4F55;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#xFF0C;&#x6240;&#x4EE5;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x5C31;&#x53D1;&#x751F;&#x5728;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x3002;
+&#x7136;&#x540E;scheduler&#x8FDB;&#x884C;&#x4E86;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#xFF0C;&#x5728;&#x8C03;&#x5EA6;&#x540E;&#x7684;&#x7EBF;&#x7A0B;&#x4E2D;&#x6267;&#x884C;&#x4E86;&#x8BA2;&#x9605;&#x3002;</p>
+<blockquote>
+<p>&#x5728;&#x8C03;&#x5EA6;&#x540E;&#x7684;&#x7EBF;&#x7A0B;&#x4E2D;&#x6267;&#x884C;&#x4E86;&#x8BA2;&#x9605;</p>
+</blockquote>
+<p>&#x8FD9;&#x53E5;&#x8BDD;&#x5F88;&#x9738;&#x9053;&#xFF0C;&#x8D77;&#x7801;&#x9700;&#x8981;&#x4E00;&#x4E2A;&#x5927;&#x7BC7;&#x5E45;&#x7684;&#x4EE3;&#x7801;&#x624D;&#x80FD;&#x8BF4;&#x5F97;&#x901A;&#xFF0C;&#x6240;&#x4EE5;&#x5148;&#x653E;&#x7740;&#xFF0C;&#x6211;&#x4F1A;&#x5728;&#x8FD9;&#x6574;&#x4E2A;&#x6D41;&#x7A0B;&#x7ED3;&#x675F;&#x540E;&#x518D;&#x7EED;&#x5199;&#x8FD9;&#x4E00;&#x5757;&#x662F;&#x600E;&#x4E48;&#x8C03;&#x5EA6;&#x7684;&#xFF0C;&#x4E0D;&#x7136;&#x8FD9;&#x4E00;&#x5757;&#x770B;&#x5B8C;&#x6D41;&#x7A0B;&#x4E0A;&#x53C8;&#x8854;&#x63A5;&#x4E0D;&#x4E0A;&#x4E86;&#xFF0C;&#x76EE;&#x524D;&#x5C31;&#x5148;&#x77E5;&#x9053;&#x4ED6;&#x7684;&#x4F5C;&#x7528;&#x5C31;&#x662F;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#x5C31;&#x884C;&#x4E86;&#x3002;</p>
+<p>&#x5728;&#x8BA2;&#x9605;&#x4EE3;&#x7801;&#x4E2D;&#x53C8;&#x662F;&#x548C;&#x4E0A;&#x9762;&#x4E00;&#x6837;&#xFF0C;&#x53EA;&#x662F;&#x8FD9;&#x4E00;&#x6B21;&#xFF0C;source&#x662F;ObservableMap&#xFF0C;&#x800C;MapObserver&#x662F;&#x5728;&#x4E0A;&#x4E00;&#x5C42;&#x7684;SubscribeOnObserver&#x4E0A;&#x518D;&#x5305;&#x4E00;&#x5C42;&#xFF0C;&#x7136;&#x540E;&#x53C8;&#x8C03;&#x5EA6;&#x7EBF;&#x7A0B;&#x3002;
+&#x4E0A;&#x9762;&#x8FD9;&#x4E00;&#x4E2A;&#x8BA2;&#x9605;&#x8FC7;&#x7A0B;&#x662F;&#x53D1;&#x751F;&#x5728;&#x4E0A;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#x540E;&#x7684;&#x7EBF;&#x7A0B;&#x4E2D;&#xFF0C;&#x6240;&#x4EE5;subscribeOn&#x6307;&#x5B9A;&#x7684;&#x662F;&#x4ED6;&#x7684;&#x4E0A;&#x4E00;&#x6B65;&#x7684;&#x7EBF;&#x7A0B;&#x3002;</p>
+<pre><code>@Override
+public void subscribeActual(Observer&lt;? super U&gt; t) {
+    source.subscribe(new MapObserver&lt;T, U&gt;(t, function));
+}
+</code></pre><p>&#x8FD9;&#x4E00;&#x6B21;&#x7684;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#x4E2D;&#x6267;&#x884C;&#x7684;&#x662F;ObservableMap&#x4E2D;&#x7684;&#x8BA2;&#x9605;&#x65B9;&#x6CD5;&#xFF0C;&#x8FD9;&#x91CC;&#x7684;source&#x662F;ObservableMap&#xFF1B;&#x53EA;&#x505A;&#x4E86;&#x8BA2;&#x9605;&#xFF0C;&#x5E76;&#x5BF9;&#x4E0A;&#x4E00;&#x6B65;&#x4E2D;&#x7684;SubscribeOnObserver&#x8FDB;&#x884C;&#x4E86;&#x518D;&#x5305;&#x88F9;&#xFF0C;&#x5E76;&#x4F20;&#x5165;&#x4E86;&#x81EA;&#x5DF1;&#x7684;Function&#x3002;</p>
+<p>&#x7136;&#x540E;&#x53C8;&#x662F;&#x4E00;&#x6B21;map&#xFF0C;&#x505A;&#x540C;&#x6837;&#x5904;&#x7406;&#xFF0C;&#x53EA;&#x4E0D;&#x8FC7;&#x8FD9;&#x4E00;&#x6B21;&#x7684;&#x88AB;&#x8BA2;&#x9605;&#x8005;&#x662F;ObservableCreate&#x3002;</p>
+<pre><code>@Override
+protected void subscribeActual(Observer&lt;? super T&gt; observer) {
+    CreateEmitter&lt;T&gt; parent = new CreateEmitter&lt;T&gt;(observer);
+    observer.onSubscribe(parent);
+
+    try {
+        source.subscribe(parent);
+    } catch (Throwable ex) {
+        Exceptions.throwIfFatal(ex);
+        parent.onError(ex);
+    }
+}
+</code></pre><p>&#x5C06;&#x4F20;&#x8FC7;&#x6765;&#x7684;MapObserver&#x5305;&#x88C5;&#x6210;&#x4E86;&#x4E00;&#x4E2A;CreateEmitter&#xFF0C;&#x7136;&#x540E;&#x6267;&#x884C;&#x4E86;source.subscribe(parent)&#xFF0C;&#x8FD9;&#x91CC;&#x7684;source&#x662F;ObservableOnSubscribe&#xFF0C;&#x5230;&#x7EC8;&#x70B9;&#x4E86;&#xFF0C;&#x662F;&#x7528;&#x6765;&#x53D1;&#x5C04;&#x4E8B;&#x4EF6;&#x7684;&#x56DE;&#x8C03;&#x3002;</p>
+<pre><code>@Override
+public void onNext(T t) {
+    if (t == null) {
+        onError(new NullPointerException(&quot;onNext called with null. Null values are generally not allowed in 2.x operators and sources.&quot;));
+        return;
+    }
+    if (!isDisposed()) {
+        observer.onNext(t);
+    }
+}
+</code></pre><p>&#x8FD9;&#x65F6;&#x5019;&#x53D1;&#x51FA;&#x4E86;OnNext()&#x4E8B;&#x4EF6;&#xFF0C;&#x8FD9;&#x4E2A;OnNext&#x662F;&#x7531;CreateEmitter&#x53D1;&#x51FA;&#x7684;&#xFF0C;&#x4ED6;&#x662F;&#x5BF9;MapObserver&#x8FDB;&#x884C;&#x4E86;&#x5305;&#x88C5;&#xFF0C;&#x5728;&#x4ED6;&#x7684;OnNext&#x65B9;&#x6CD5;&#x4E2D;&#x5BF9;&#x4E8B;&#x4EF6;&#x6D41;&#x505A;&#x4E86;&#x662F;&#x5426;&#x65AD;&#x6D41;&#x7684;&#x5224;&#x65AD;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x8C03;&#x7528;MapObserver&#x7684;OnNext&#x4E8B;&#x4EF6;</p>
+<pre><code>@Override
+public void onNext(T t) {
+    if (done) {
+        return;
+    }
+
+    if (sourceMode != NONE) {
+        actual.onNext(null);
+        return;
+    }
+
+    U v;
+
+    try {
+        v = ObjectHelper.requireNonNull(mapper.apply(t), &quot;The mapper function returned a null value.&quot;);
+    } catch (Throwable ex) {
+        fail(ex);
+        return;
+    }
+    actual.onNext(v);
+}
+</code></pre><p>&#x7CBE;&#x7B80;&#x4E00;&#x4E0B;</p>
+<pre><code>@Override
+public void onNext(T t) {
+    U v;
+    v = ObjectHelper.requireNonNull(mapper.apply(t), &quot;The mapper function returned a null value.&quot;); 
+    actual.onNext(v);
+}
+</code></pre><p>&#x83B7;&#x53D6;&#x5230;mapper&#xFF08;&#x5C31;&#x662F;&#x4F20;&#x8FDB;&#x6765;&#x7684;Function&#xFF09;&#x7684;&#x7ED3;&#x679C;&#xFF0C;&#x7136;&#x540E;&#x4F5C;&#x4E3A;&#x53C2;&#x6570;&#x4F20;&#x9012;&#x7ED9;&#x81EA;&#x5DF1;&#x5305;&#x88C5;&#x4E2D;&#x7684;MapObserver&#x4E2D;&#x7684;OnNext&#xFF0C;&#x5728;&#x6848;&#x4F8B;&#x4E2D;&#x5C31;&#x662F;&#xFF08;&quot;&quot;+s&#xFF09;&#xFF1B;</p>
+<p>&#x5728;&#x5305;&#x88F9;&#x4E2D;&#x7684;MapObserver&#x4E2D;&#x7684;OnNext&#xFF0C;&#x505A;&#x7684;&#x662F;&#x540C;&#x6837;&#x7684;&#x64CD;&#x4F5C;&#xFF0C;&#x53EA;&#x4E0D;&#x8FC7;&#xFF0C;&#x8FD9;&#x91CC;&#x7684;MapObserver&#x5305;&#x88F9;&#x7684;&#x662F;SubscribeOnObserver&#xFF0C;&#x5728;&#x4ED6;&#x7684;OnNext&#x4E2D;&#x6CA1;&#x6709;&#x505A;&#x4EC0;&#x4E48;&#xFF0C;&#x53EA;&#x662F;&#x505A;&#x4E86;&#x4F20;&#x9012;&#xFF0C;&#x4F20;&#x9012;&#x7ED9;&#x4E86;&#x4ED6;&#x5305;&#x88F9;&#x7740;&#x7684;SubscribeOnObserver&#xFF0C;&#x540C;&#x6837;&#x662F;&#x4F20;&#x9012;&#xFF0C;&#x7136;&#x540E;&#x518D;OnNext&#x4E2D;&#x4F20;&#x9012;&#x7ED9;&#x4E86;ObserveOnObserver&#xFF0C;&#x7136;&#x540E;&#x518D;&#x4ED6;&#x7684;OnNext&#x4E2D;&#x505A;&#x4E8B;&#x60C5;</p>
+<pre><code>@Override
+public void onNext(T t) {
+    if (done) {
+        return;
+    }
+
+    if (sourceMode != QueueDisposable.ASYNC) {
+        queue.offer(t);
+    }
+    schedule();
+}
+</code></pre><pre><code>void schedule() {
+    if (getAndIncrement() == 0) {
+        worker.schedule(this);
+    }
+}
+</code></pre><p>&#x5728;&#x8FD9;&#x91CC;&#x505A;&#x4E86;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#xFF0C;&#x56E0;&#x4E3A;ObserveOnObserver&#x672C;&#x8EAB;&#x5B9E;&#x73B0;&#x4E86;Runnable&#x63A5;&#x53E3;&#xFF0C;&#x6240;&#x4EE5;&#x8FD9;&#x91CC;&#x5C31;&#x7B97;&#x662F;&#x628A;&#x81EA;&#x5DF1;&#x4F20;&#x8FDB;&#x53BB;&#x4E86;&#xFF0C;&#x6700;&#x7EC8;&#x5728;run&#x65B9;&#x6CD5;&#x4E2D;&#x505A;&#x4ED6;&#x5305;&#x88F9;&#x7684;Observer&#x7684;OnNext&#x65B9;&#x6CD5;&#x7684;&#x56DE;&#x8C03;&#xFF0C;&#x5728;&#x6848;&#x4F8B;&#x4E2D;&#xFF0C;&#x8FD9;&#x91CC;&#x7684;Observer&#x5C31;&#x662F;&#x539F;&#x59CB;&#x7684;Observer&#xFF0C;&#x5C31;&#x662F;&#x6700;&#x7EC8;&#x7684;Observer&#x4E86;&#xFF0C;&#x6240;&#x4EE5;&#x6700;&#x7EC8;Observer&#x8FD0;&#x884C;&#x5728;&#x4E0A;&#x4E00;&#x4E2A;observeOn&#x6307;&#x5B9A;&#x7684;&#x7EBF;&#x7A0B;&#x4E2D;&#x3002;</p>
+<p>&#x5230;&#x8FD9;&#x91CC;&#x6574;&#x4E2A;&#x6D41;&#x7A0B;&#x5C31;&#x7ED3;&#x675F;&#x4E86;&#xFF0C;&#x518D;&#x6765;&#x603B;&#x7ED3;&#x56DE;&#x987E;&#x4E00;&#x4E0B;&#xFF1A;</p>
+<p><strong>&#x6848;&#x4F8B;&#x4E2D;&#xFF0C;&#x6BCF;&#x4E2A;&#x64CD;&#x4F5C;&#x7B26;&#x90FD;&#x4F1A;&#x8FD4;&#x56DE;&#x5BF9;&#x5E94;&#x7684;&#x521B;&#x5EFA;&#x7684;&#x88AB;&#x89C2;&#x5BDF;&#x8005;</strong></p>
+<ul>
+<li>&#x4E8B;&#x4EF6;&#x6D41;&#x4ECE;create&#x5F00;&#x59CB;&#x521B;&#x5EFA;&#x4E8B;&#x4EF6;&#x5C31;&#x662F;&#x53EA;&#x662F;&#x521B;&#x9020;&#x4E8B;&#x4EF6;&#x6E90;(&#x88AB;&#x89C2;&#x5BDF;&#x8005;)&#xFF0C;&#x4ED6;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;&#x88AB;&#x89C2;&#x5BDF;&#x8005;&#xFF0C;&#x7136;&#x540E;&#x6301;&#x6709;&#x4E00;&#x4E2A;ObservableOnSubscribe&#x7684;&#x5F15;&#x7528;&#x3002;</li>
+<li>&#x63A5;&#x7740;&#x5230;&#x4E86;&#x7B2C;&#x4E00;&#x4E2A;map&#xFF0C;&#x5728;&#x8FD9;&#x91CC;&#x4E5F;&#x662F;&#x53EA;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;&#x88AB;&#x89C2;&#x5BDF;&#x8005;ObservableMap&#xFF0C;&#x7136;&#x540E;&#x5B83;&#x6301;&#x6709;&#x4E86;&#x4E0A;&#x4E00;&#x4E2A;ObservableOnSubscribe&#x7684;&#x5F15;&#x7528;&#xFF0C;&#x5E76;&#x4FDD;&#x5B58;&#x4E86;&#x4F20;&#x5165;&#x7684;function&#x3002;</li>
+<li>&#x63A5;&#x7740;&#x7B2C;&#x4E8C;&#x4E2A;map&#x540C;&#x7406;&#xFF0C;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;&#x88AB;&#x89C2;&#x5BDF;&#x8005;ObservableMap&#xFF0C;&#x7136;&#x540E;&#x5B83;&#x6301;&#x6709;&#x4E86;&#x4E0A;&#x4E00;&#x4E2A;ObservableMap&#x7684;&#x5F15;&#x7528;&#xFF0C;&#x5E76;&#x4FDD;&#x5B58;&#x4E86;&#x4F20;&#x5165;&#x7684;function&#x3002;</li>
+<li>&#x63A5;&#x7740;&#x662F;subscribeOn&#xFF0C;&#x4ED6;&#x521B;&#x5EFA;&#x4E86;ObservableSubscribeOn&#x5BF9;&#x8C61;&#xFF0C;&#x5E76;&#x6301;&#x6709;&#x4E86;&#x4E0A;&#x4E00;&#x4E2A;&#x88AB;&#x89C2;&#x5BDF;&#x8005;ObservableMap&#x7684;&#x5F15;&#x7528;&#xFF0C;&#x5E76;&#x4FDD;&#x5B58;&#x4E86;&#x4F20;&#x5165;&#x7684;scheduler&#x3002;</li>
+<li>&#x63A5;&#x7740;&#x662F;subscribeOn&#xFF0C;&#x4ED6;&#x521B;&#x5EFA;&#x4E86;ObservableSubscribeOn&#x5BF9;&#x8C61;&#xFF0C;&#x5E76;&#x6301;&#x6709;&#x4E86;&#x4E0A;&#x4E00;&#x4E2A;&#x88AB;&#x89C2;&#x5BDF;&#x8005;ObservableSubscribeOn&#x7684;&#x5F15;&#x7528;&#xFF0C;&#x5E76;&#x4FDD;&#x5B58;&#x4E86;&#x4F20;&#x5165;&#x7684;scheduler&#x3002;</li>
+<li>&#x63A5;&#x7740;&#x662F;observeOn&#xFF0C;&#x4ED6;&#x521B;&#x5EFA;&#x4E86;ObservableObserveOn&#xFF0C;&#x5E76;&#x6301;&#x6709;&#x4E86;&#x4E0A;&#x4E00;&#x4E2A;&#x88AB;&#x89C2;&#x5BDF;&#x8005;ObservableSubscribeOn&#x7684;&#x5F15;&#x7528;&#xFF0C;&#x5E76;&#x4FDD;&#x5B58;&#x4E86;&#x4F20;&#x5165;&#x7684;scheduler&#x3002;</li>
+<li>&#x63A5;&#x7740;&#x662F;subscribe&#xFF0C;&#x8C03;&#x7528;&#x4E86;subscribeActual(observer)&#x65B9;&#x6CD5;&#xFF0C;&#x540E;&#x7EED;&#x7684;&#x57FA;&#x672C;&#x4E0A;&#x90FD;&#x8D70;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x3002;</li>
+<li>&#x8FD9;&#x4E2A;subscribe&#x7684;&#x76F4;&#x63A5;&#x8C03;&#x7528;&#x8005;&#x4E0A;&#x4E00;&#x6B65;&#x4E2D;&#x88AB;&#x89C2;&#x5BDF;&#x8005;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;ObservableObserveOn&#xFF1B;&#x4ED6;&#x5728;subscribeActual&#x4E2D;&#x5BF9;observeOn&#x4F20;&#x5165;&#x7684;&#x7EBF;&#x7A0B;&#x5BF9;&#x4E86;&#x5224;&#x65AD;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x5219;&#x76F4;&#x63A5;&#x8BA2;&#x9605;&#xFF0C;&#x5426;&#x5219;&#x505A;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#x8BA2;&#x9605;&#xFF0C;&#x5F53;&#x7136;&#x76EE;&#x524D;&#x53EA;&#x662F;&#x628A;&#x8C03;&#x5EA6;&#x673A;&#x5236;&#x4F20;&#x5165;&#x5230;ObserveOnObserver&#x4E2D;&#xFF0C;&#x8FD8;&#x6CA1;&#x6709;&#x64CD;&#x4F5C;&#x3002;</li>
+<li>&#x5728;&#x8FD9;&#x4E2A;subscribeActual&#x4E2D;&#x7684;source&#x5C31;&#x662F;ObservableObserveOn&#x6240;&#x6301;&#x6709;&#x7684;&#x4E0A;&#x4E00;&#x6B65;&#x7684;&#x88AB;&#x89C2;&#x5BDF;&#x8005;&#x4E5F;&#x5C31;&#x662F;ObservableSubscribeOn&#xFF0C;&#x6240;&#x4EE5;&#x5C31;&#x662F;&#x89E6;&#x53D1;&#x4E86;ObservableSubscribeOn&#x4E2D;&#x7684;subscribeActual&#x65B9;&#x6CD5;&#xFF0C;&#x5728;&#x8FD9;&#x91CC;&#x9762;&#x89E6;&#x53D1;&#x4E86;onSubscribe();&#x7136;&#x540E;&#x8FDB;&#x884C;&#x4E86;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#xFF0C;&#x5728;&#x8C03;&#x5EA6;&#x4E2D;&#x7EBF;&#x7A0B;&#x4E2D;&#x53C8;&#x6267;&#x884C;&#x4E86;&#x8BA2;&#x9605;&#xFF1B;</li>
+<li>&#x8FD9;&#x4E00;&#x6B21;&#x7684;&#x8BA2;&#x9605;&#x4E2D;&#x7684;source&#x662F;&#x5F53;&#x524D;&#x88AB;&#x89C2;&#x5BDF;&#x8005;&#x6240;&#x6301;&#x6709;&#x7684;&#x4E0A;&#x4E00;&#x6B65;&#x4E2D;&#x7684;&#x88AB;&#x89C2;&#x5BDF;&#x8005;&#xFF0C;&#x5C31;&#x662F;&#x7B2C;&#x4E00;&#x4E2A;subscribeOn&#x4E2D;&#x521B;&#x5EFA;&#x7684;ObservableSubscribeOn&#xFF1B;</li>
+<li>&#x8C03;&#x7528;&#x4E86;ObservableSubscribeOn&#x4E2D;&#x7684;subscribeActual&#x65B9;&#x6CD5;&#xFF0C;&#x4ECE;&#x8FD9;&#x91CC;&#x5F00;&#x59CB;&#xFF0C;&#x4ED6;&#x5C31;&#x8FD0;&#x884C;&#x5728;&#x4E86;&#x7B2C;&#x4E8C;&#x4E2A;subscribeOn&#x6240;&#x6307;&#x5B9A;&#x7684;&#x7EBF;&#x7A0B;&#x4E2D;&#x4E86;&#xFF1B;</li>
+<li>&#x5728;&#x8FD9;&#x91CC;&#x53C8;&#x505A;&#x4E86;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#xFF0C;&#x7136;&#x540E;&#x5728;&#x8C03;&#x5EA6;&#x7EBF;&#x7A0B;&#x4E2D;&#x505A;&#x4E86;&#x8BA2;&#x9605;&#xFF0C;&#x8FD9;&#x91CC;&#x7684;source&#x662F;&#x4ED6;&#x7684;&#x4E0A;&#x4E00;&#x4E2A;&#x6B65;&#x4E2D;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;ObservableMap&#xFF1B;</li>
+<li>&#x5728;ObservableMap&#x4E2D;&#x7684;subscribeActual&#x65B9;&#x6CD5;&#x4E2D;&#x53C8;&#x505A;&#x4E86;&#x8BA2;&#x9605;&#xFF1B;</li>
+<li>&#x53C8;&#x5F80;&#x4E0A;&#x8D70;&#xFF0C;&#x5230;&#x4E86;&#x7B2C;&#x4E00;&#x4E2A;map&#xFF0C;&#x540C;&#x6837;&#x5728;subscribeActual&#x4E2D;&#x505A;&#x4E86;&#x8BA2;&#x9605;&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x91CC;&#x7684;source&#x662F;ObservableCreate&#xFF0C;&#x5728;&#x8FD9;&#x91CC;&#x9762;&#x89E6;&#x53D1;&#x4E86;ObservableOnSubscribe&#x7684;&#x56DE;&#x8C03;subscribe(ObservableEmitter)&#x65B9;&#x6CD5;&#xFF0C;&#x7B97;&#x662F;&#x8BA2;&#x9605;&#x5B8C;&#x4E86;&#xFF0C;&#x5F00;&#x59CB;&#x53D1;&#x5C04;&#x4E8B;&#x4EF6;&#xFF1B;</li>
+<li>&#x8FD9;&#x4E2A;&#x4E8B;&#x4EF6;&#x662F;&#x54EA;&#x91CC;&#x6765;&#x7684;&#x5462;&#xFF0C;&#x6BCF;&#x6B21;&#x5728;&#x6267;&#x884C;subscribeActual&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x90FD;&#x4F1A;&#x5BF9;&#x5E95;&#x90E8;&#x4F20;&#x4E0A;&#x6765;&#x7684;Observer&#x8FDB;&#x884C;&#x4E00;&#x6B21;&#x5305;&#x88C5;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x81EA;&#x5DF1;&#x60F3;&#x52A0;&#x5165;&#x7684;&#x4E1C;&#x897F;&#x52A0;&#x5165;&#x8FDB;&#x53BB;&#xFF0C;&#x901A;&#x8FC7;&#x4EE3;&#x7406;&#x6A21;&#x5F0F;&#x4E0B;&#x53D1;&#x4E8B;&#x4EF6;&#xFF1B;</li>
+<li>&#x5F53;&#x524D;&#x6848;&#x4F8B;&#x4E2D;&#x5C31;&#x662F;&#x8BA2;&#x9605;&#x5F00;&#x59CB;&#x7684;&#x65F6;&#x5019;observeOn&#x7684;subscribeActual&#x4E2D;&#x5982;&#x679C;&#x505A;&#x4E86;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#x5C31;&#x4F1A;&#x5C06;&#x539F;&#x59CB;&#x7684;Observer&#x5305;&#x88C5;&#x6210;ObserveOnObserver&#xFF0C;&#x518D;&#x7ECF;&#x8FC7;subscribeOn&#x4E2D;&#x7684;subscribeActual&#x65B9;&#x6CD5;&#xFF0C;&#x53C8;&#x5C06;ObserveOnObserver&#x5305;&#x88C5;&#x6210;SubscribeOnObserver&#xFF1B;&#x53C8;&#x4E00;&#x6B21;subscribeOn&#xFF0C;&#x5C06;SubscribeOnObserver&#x53C8;&#x5305;&#x88F9;&#x4E0A;&#x4E00;&#x5C42;SubscribeOnObserver&#xFF1B;&#x5230;&#x4E86;map&#x53C8;&#x5305;&#x88C5;&#x6210;&#x4E86;MapObserver&#xFF0C;&#x540C;&#x6837;&#x4E24;&#x6B21;map&#xFF0C;&#x5305;&#x88F9;&#x53C8;&#x4E00;&#x5C42;MapObserver&#xFF0C;&#x6700;&#x540E;&#x5230;&#x4E86;ObservableCreate&#x4E2D;&#x7684;subscribeActual&#xFF0C;&#x5C06;&#x4E0A;&#x9762;&#x7684;MapObserver&#x5305;&#x88F9;&#x6210;&#x4E86;CreateEmitter&#x3002;</li>
+<li>&#x4E0A;&#x9762;&#x8FD9;&#x4E2A;&#x5C31;&#x50CF;&#x4E00;&#x4E2A;&#x573A;&#x666F;&#xFF1A;&#x6211;&#x4EEC;&#x5B9A;&#x4E49;&#x4E00;&#x4E2A;&#x4E3B;&#x9898;&#x53EB;&#x505A;&#x5C45;&#x4F4F;&#xFF0C;&#x5C31;&#x5F00;&#x59CB;&#x8FD0;&#x4F5C;&#xFF1B;&#x6211;&#x4EEC;&#x5728;&#x7A7A;&#x5730;&#x4E0A;&#x653E;&#x4E00;&#x5F20;&#x5E8A;&#xFF0C;&#x8FD9;&#x662F;&#x5C45;&#x4F4F;&#xFF0C;&#x5728;&#x5E8A;&#x5468;&#x56F4;&#x642D;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;&#x8305;&#x8349;&#x5C4B;&#xFF0C;&#x5E8A;&#x73B0;&#x5728;&#x5728;&#x8305;&#x8349;&#x5C4B;&#x91CC;&#x9762;&#xFF0C;&#x8FD9;&#x4E5F;&#x53EB;&#x5C45;&#x4F4F;&#xFF1B;&#x7136;&#x540E;&#x6211;&#x4EEC;&#x5728;&#x5468;&#x56F4;&#x517B;&#x4E86;&#x4E24;&#x53EA;&#x9E21;&#xFF0C;&#x7136;&#x540E;&#x56F4;&#x4E86;&#x4E00;&#x5708;&#x7BF1;&#x7B06;&#xFF0C;&#x8FD9;&#x6837;&#x4E5F;&#x53EB;&#x5C45;&#x4F4F;&#xFF0C;&#x7136;&#x540E;&#x6211;&#x4EEC;&#x642D;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;&#x6751;&#x843D;&#xFF0C;&#x8FD9;&#x4E5F;&#x53EB;&#x5C45;&#x4F4F;&#xFF0C;&#x7136;&#x540E;&#x6211;&#x4EEC;&#x642D;&#x8D77;&#x4E86;&#x57CE;&#x5899;&#xFF0C;&#x5EFA;&#x6210;&#x4E86;&#x4E00;&#x5EA7;&#x57CE;&#x6C60;&#xFF0C;&#x8FD9;&#x4E5F;&#x53EB;&#x5C45;&#x4F4F;&#xFF0C;&#x7B49;&#x7B49;&#x4E00;&#x76F4;&#x5230;&#x6211;&#x4EEC;&#x6210;&#x7ACB;&#x4E00;&#x4E2A;&#x56FD;&#x5BB6;&#xFF0C;&#x8FD9;&#x90FD;&#x53EB;&#x5C45;&#x4F4F;&#x3002;&#x4ECE;&#x4E00;&#x5F20;&#x5E8A;&#x5230;&#x4E00;&#x4E2A;&#x56FD;&#x5BB6;&#xFF0C;&#x6211;&#x4EEC;&#x6700;&#x7EC8;&#x76EE;&#x7684;&#x90FD;&#x662F;&#x5C45;&#x4F4F;&#xFF0C;&#x53EA;&#x662F;&#x4E2D;&#x95F4;&#x88AB;&#x6211;&#x4EEC;&#x589E;&#x52A0;&#x4E86;&#x5F88;&#x591A;&#x4E1C;&#x897F;</li>
+<li>&#x56DE;&#x5230;&#x4EE3;&#x7801;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x5728;ObservableCreate&#x7684;subscribeActual&#x4E2D;&#x5F00;&#x59CB;&#x53D1;&#x5C04;&#x4E8B;&#x4EF6;&#xFF0C;&#x5047;&#x8BBE;&#x53D1;&#x5C04;&#x4E86;&#x4E00;&#x4E2A;OnNext&#x4E8B;&#x4EF6;&#xFF0C;&#x4F1A;&#x5148;&#x8C03;&#x7528;CreateEmitter&#x7684;OnNext&#xFF0C;&#x5728;&#x8FD9;&#x91CC;&#x505A;&#x4E86;&#x662F;&#x5426;&#x65AD;&#x6D41;&#x5224;&#x65AD;&#xFF0C;&#x7136;&#x540E;&#x5F80;&#x4E0B;&#x8C03;&#x7528;&#x4E86;MapObserver&#x7684;OnNext&#x65B9;&#x6CD5;&#xFF0C;&#x5728;&#x8FD9;&#x91CC;&#xFF0C;&#x83B7;&#x53D6;&#x5230;&#x4F20;&#x8FDB;&#x6765;&#x7684;function&#x7684;&#x7ED3;&#x679C;&#xFF0C;&#x5C06;&#x4ED6;&#x4F5C;&#x4E3A;&#x53C2;&#x6570;&#x4F20;&#x9012;&#x7ED9;&#x4E0B;&#x4E00;&#x4E2A;ObservableMap&#x7684;OnNext&#x4E2D;&#xFF0C;&#x4E0B;&#x4E00;&#x4E2A;ObservableMap&#x505A;&#x540C;&#x7406;&#x64CD;&#x4F5C;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x4ED6;&#x4F20;&#x9012;&#x7ED9;SubscribeOnObserver&#x7684;OnNext&#xFF0C;&#x7136;&#x540E;&#x53C8;&#x5C06;&#x4ED6;&#x4F20;&#x9012;&#x7ED9;SubscribeOnObserver&#x7684;OnNext&#xFF08;&#x6848;&#x4F8B;&#x91CC;&#x4E24;&#x6B21;subscribeOn&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x4F20;&#x9012;&#x7ED9;ObservableObserveOn&#x7684;OnNext&#xFF0C;&#x5728;OnNext&#x4E2D;&#x505A;&#x4E86;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#xFF0C;&#x7136;&#x540E;&#x4F20;&#x9012;&#x7ED9;&#x4E86;&#x6700;&#x7EC8;&#x539F;&#x59CB;&#x7684;Observer&#x7684;OnNext</li>
+<li>&#x5728;&#x8FD9;&#x4E2D;&#x95F4;&#x4ECE;&#x4E0B;&#x5F80;&#x4E0A;&#x5F00;&#x59CB;&#x7B2C;&#x4E00;&#x4E2A;subscribeOn&#x4E2D;&#x7684;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#x5F00;&#x59CB;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x7B2C;&#x4E8C;&#x4E2A;subscribeOn&#x4E2D;&#x7684;subscribeActual&#x5F00;&#x59CB;&#xFF0C;&#x540E;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x90FD;&#x8FD0;&#x884C;&#x5728;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#xFF08;&#x662F;&#x8BA2;&#x9605;&#x5F80;&#x4E0A;&#x8D70;&#x7684;&#x6D41;&#x7A0B;&#xFF0C;&#x5F80;&#x4E0A;&#x8BA2;&#x9605;&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x78B0;&#x5230;&#x4E86;&#x7B2C;&#x4E00;&#x4E2A;subscribeOn&#xFF0C;&#x7EBF;&#x7A0B;&#x53D1;&#x751F;&#x53D8;&#x5316;&#xFF0C;&#x7136;&#x540E;&#x4E4B;&#x540E;&#x7684;&#x7EBF;&#x7A0B;&#x8DDF;&#x7740;&#x7B2C;&#x4E00;&#x4E2A;subscribeOn&#x8D70;&#xFF08;&#x662F;&#x8BA2;&#x9605;&#x5F80;&#x4E0A;&#x8D70;&#x7684;&#x6D41;&#x7A0B;&#xFF0C;&#x5F80;&#x4E0A;&#x8BA2;&#x9605;&#xFF09;&#xFF0C;&#x4E00;&#x76F4;&#x5230;&#x8BA2;&#x9605;&#x7ED3;&#x675F;&#xFF0C;&#x7136;&#x540E;&#x5F80;&#x4E0B;&#x53D1;&#x5C04;&#x4E8B;&#x4EF6;&#x540C;&#x7406;&#xFF0C;&#x4ECD;&#x7136;&#x5728;&#x8FD9;&#x4E2A;&#x7EBF;&#x7A0B;&#x4E2D;&#xFF0C;&#x4E00;&#x76F4;&#x5230;&#x6700;&#x540E;&#x4E00;&#x4E2A;Observer&#x7684;&#x4E8B;&#x4EF6;&#x56DE;&#x8C03;&#x53D1;&#x751F;&#x5728;observeOn&#x6307;&#x5B9A;&#x7684;&#x7EBF;&#x7A0B;&#x4E2D;&#x3002;&#x6240;&#x4EE5;subscribeOn&#x662F;&#x5F80;&#x4E0A;&#xFF0C;observeOn&#x662F;&#x5F80;&#x4E0B;&#x3002;</li>
+</ul>
+<p>&#x518D;&#x6765;&#x8BF4;&#x8BF4;&#x4E4B;&#x524D;&#x63D0;&#x5230;&#x7684;&#x90A3;&#x4E2A;&#x6BD4;&#x8F83;&#x9738;&#x9053;&#x7684;&#x7EBF;&#x7A0B;&#x5207;&#x6362;&#xFF1B;</p>
+<p>&#x5728;ObservableSubscribeOn&#x4E2D;&#x7684;subscribeActual&#x4E2D;</p>
+<pre><code>@Override
+public void subscribeActual(final Observer&lt;? super T&gt; s) {
+    final SubscribeOnObserver&lt;T&gt; parent = new SubscribeOnObserver&lt;T&gt;(s);
+
+    s.onSubscribe(parent);
+
+    parent.setDisposable(scheduler.scheduleDirect(new SubscribeTask(parent)));
+}
+</code></pre><pre><code>final class SubscribeTask implements Runnable {
+    private final SubscribeOnObserver&lt;T&gt; parent;
+
+        SubscribeTask(SubscribeOnObserver&lt;T&gt; parent) {
+            this.parent = parent;
+        }
+
+        @Override
+        public void run() {
+            source.subscribe(parent);
+        }
+    }
+</code></pre><pre><code>@NonNull
+public Disposable scheduleDirect(@NonNull Runnable run) {
+    return scheduleDirect(run, 0L, TimeUnit.NANOSECONDS);
+}
+</code></pre><pre><code>@NonNull
+public Disposable scheduleDirect(@NonNull Runnable run, long delay, @NonNull TimeUnit unit) {
+    final Worker w = createWorker();
+
+    final Runnable decoratedRun = RxJavaPlugins.onSchedule(run);
+
+    DisposeTask task = new DisposeTask(decoratedRun, w);
+
+    w.schedule(task, delay, unit);
+
+    return task;
+}
+</code></pre><p>&#x4ECE;&#x4E0A;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF0C;&#x5148;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;SubscribeTask&#xFF0C;&#x4ED6;&#x5B9E;&#x73B0;&#x4E86;Runnable&#xFF0C;&#x5E76;&#x5728;run&#x65B9;&#x6CD5;&#x4E2D;&#x6307;&#x5B9A;&#x4E86;&#x8BA2;&#x9605;&#x64CD;&#x4F5C;&#xFF0C;&#x63A5;&#x4E0B;&#x6765;&#x5C31;&#x770B;&#x770B;&#x8FD9;&#x4E2A;run&#x662F;&#x5728;&#x54EA;&#x88AB;&#x8C03;&#x5EA6;&#x7684;&#xFF1B;
+&#x5728;scheduleDirect&#x65B9;&#x6CD5;&#x4E2D;</p>
+<pre><code>public Disposable scheduleDirect(@NonNull Runnable run, long delay, @NonNull TimeUnit unit) {
+    final Worker w = createWorker();
+
+    final Runnable decoratedRun = RxJavaPlugins.onSchedule(run);
+
+    DisposeTask task = new DisposeTask(decoratedRun, w);
+
+    w.schedule(task, delay, unit);
+
+    return task;
+}
+</code></pre><p>&#x5148;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;Worker&#xFF0C;&#x901A;&#x8FC7;createWorker()&#x65B9;&#x6CD5;&#xFF0C;&#x8FD9;&#x4E2A;createWorker()&#x4E5F;&#x662F;&#x62BD;&#x8C61;&#x65B9;&#x6CD5;&#xFF0C;&#x662F;&#x7531;&#x4F20;&#x5165;&#x7684;Schedulers&#x6307;&#x5B9A;&#x7684;&#xFF0C;&#x6848;&#x4F8B;&#x4E2D;&#x6211;&#x4EEC;&#x4F20;&#x5165;&#x7684;&#x662F;Schedulers.io()</p>
+<pre><code>@NonNull
+public static Scheduler io() {
+    return RxJavaPlugins.onIoScheduler(IO);
+}
+</code></pre><pre><code>static {
+    IO = RxJavaPlugins.initIoScheduler(new IOTask());
+}
+</code></pre><pre><code>static final class IOTask implements Callable&lt;Scheduler&gt; {
+    @Override
+    public Scheduler call() throws Exception {
+        return IoHolder.DEFAULT;
+    }
+}
+</code></pre><pre><code>static final class IoHolder {
+    static final Scheduler DEFAULT = new IoScheduler();
+}
+</code></pre><pre><code>public IoScheduler() {
+    this(WORKER_THREAD_FACTORY);
+}
+</code></pre><p>&#x7ECF;&#x8FC7;&#x5C42;&#x5C42;&#x8FFD;&#x6EAF;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x6700;&#x7EC8;&#x8C03;&#x7528;&#x7684;&#x5E94;&#x8BE5;&#x662F;IoScheduler&#x7684;createWorker&#x65B9;&#x6CD5;</p>
+<pre><code>public Worker createWorker() {
+    return new EventLoopWorker(pool.get());
+}
+</code></pre><pre><code>EventLoopWorker(CachedWorkerPool pool) {
+    this.pool = pool;
+    this.tasks = new CompositeDisposable();
+    this.threadWorker = pool.get();
+}
+</code></pre><p>&#x8FD9;&#x91CC;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;EventLoopWorker
+&#x518D;&#x56DE;&#x5230;&#x8FD9;&#x4E2A;&#x4EE3;&#x7801;&#xFF0C;&#x5C06;Worker&#x548C;&#x6211;&#x4EEC;&#x4F20;&#x8FDB;&#x6765;&#x7684;&#x8FD9;&#x4E2A;Runnable&#x5305;&#x88C5;&#x6210;&#x4E86;DisposeTask&#xFF0C;&#x7136;&#x540E;&#x8C03;&#x7528;&#x4E86;Worker&#x7684;schedule&#x65B9;&#x6CD5;</p>
+<pre><code>public Disposable scheduleDirect(@NonNull Runnable run, long delay, @NonNull TimeUnit unit) {
+    final Worker w = createWorker();
+
+    final Runnable decoratedRun = RxJavaPlugins.onSchedule(run);
+
+    DisposeTask task = new DisposeTask(decoratedRun, w);
+
+    w.schedule(task, delay, unit);
+
+    return task;
+}
+</code></pre><pre><code>public Disposable schedule(@NonNull Runnable action, long delayTime, @NonNull TimeUnit unit) {
+    if (tasks.isDisposed()) {
+        // don&apos;t schedule, we are unsubscribed
+        return EmptyDisposable.INSTANCE;
+    }
+
+    return threadWorker.scheduleActual(action, delayTime, unit, tasks);
+}
+</code></pre><pre><code>public ScheduledRunnable scheduleActual(final Runnable run, long delayTime, @NonNull TimeUnit unit, @Nullable DisposableContainer parent) {
+    Runnable decoratedRun = RxJavaPlugins.onSchedule(run);
+
+    ScheduledRunnable sr = new ScheduledRunnable(decoratedRun, parent);
+
+    if (parent != null) {
+        if (!parent.add(sr)) {
+            return sr;
+        }
+    }
+
+    Future&lt;?&gt; f;
+    try {
+        if (delayTime &lt;= 0) {
+            f = executor.submit((Callable&lt;Object&gt;)sr);
+        } else {
+            f = executor.schedule((Callable&lt;Object&gt;)sr, delayTime, unit);
+        }
+        sr.setFuture(f);
+    } catch (RejectedExecutionException ex) {
+        if (parent != null) {
+            parent.remove(sr);
+        }
+        RxJavaPlugins.onError(ex);
+    }
+
+    return sr;
+}
+</code></pre><p>&#x5728;&#x8FD9;&#x91CC;&#x518D;&#x7CBE;&#x7B80;&#x4E00;&#x4E0B;</p>
+<pre><code>if (delayTime &lt;= 0) {
+    f = executor.submit((Callable&lt;Object&gt;)sr);
+} else {
+    f = executor.schedule((Callable&lt;Object&gt;)sr, delayTime, unit);
+}
+</code></pre><pre><code>private final ScheduledExecutorService executor;
+
+public NewThreadWorker(ThreadFactory threadFactory) {
+    executor = SchedulerPoolFactory.create(threadFactory);
+}
+</code></pre><p>&#x5728;&#x8FD9;&#x91CC;&#x505A;&#x5230;&#x4E86;&#x7EBF;&#x7A0B;&#x7684;&#x8C03;&#x5EA6;&#xFF0C;&#x5176;&#x4E2D;&#x592A;&#x5C31;&#x4E0D;&#x53BB;&#x8FFD;&#x7A76;&#x4E86;&#xFF0C;&#x5230;&#x8FD9;&#x91CC;&#x57FA;&#x672C;&#x4E0A;&#x5C31;&#x5B8C;&#x6210;&#x4E86;&#x7EBF;&#x7A0B;&#x7684;&#x8C03;&#x5EA6;&#x3002;</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="RxJava2的Disposable.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: RxJava2的Disposable">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"RxJava2-线程调度","level":"1.3.3","depth":2,"previous":{"title":"RxJava2的Disposable","level":"1.3.2","depth":2,"path":"RxJava2/RxJava2的Disposable.md","ref":"RxJava2/RxJava2的Disposable.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["livereload"],"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"RxJava2/RxJava2-线程调度.md","mtime":"2019-05-29T07:16:33.108Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-05-29T07:16:43.218Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-livereload/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
