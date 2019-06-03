@@ -1,0 +1,461 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Rxjava2-Maybe · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    <link rel="prev" href="Rxjava2-Single.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../Rxjava1/">
+            
+                <a href="../Rxjava1/">
+            
+                    
+                    RxJava1
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="../RxJava1/RxJava1的基本使用和基本原理.html">
+            
+                <a href="../RxJava1/RxJava1的基本使用和基本原理.html">
+            
+                    
+                    RxJava1的基本使用和基本原理
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    RxJava2
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.3.1" data-path="RxJava2的基本使用和基本原理.html">
+            
+                <a href="RxJava2的基本使用和基本原理.html">
+            
+                    
+                    RxJava2的基本使用和基本原理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.2" data-path="RxJava2的Disposable.html">
+            
+                <a href="RxJava2的Disposable.html">
+            
+                    
+                    RxJava2的Disposable
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.3" data-path="RxJava2-线程调度.html">
+            
+                <a href="RxJava2-线程调度.html">
+            
+                    
+                    RxJava2-线程调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.4" data-path="Rxjava2-Single.html">
+            
+                <a href="Rxjava2-Single.html">
+            
+                    
+                    Rxjava2-Single
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.3.5" data-path="Rxjava2-Maybe.html">
+            
+                <a href="Rxjava2-Maybe.html">
+            
+                    
+                    Rxjava2-Maybe
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Rxjava2-Maybe</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="rxjava2-maybe">Rxjava2-Maybe</h1>
+<p><strong>Maybe:&#x53EF;&#x4EE5;&#x53D1;&#x5C04;&#x4E00;&#x6761;&#x5355;&#x4E00;&#x7684;&#x6570;&#x636E;&#x4EE5;&#x53CA;&#x4E00;&#x6761;&#x5F02;&#x5E38;&#x901A;&#x77E5;&#x6216;&#x8005;&#x4E00;&#x6761;&#x5B8C;&#x6210;&#x901A;&#x77E5;&#xFF0C;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x662F;&#xFF0C;&#x5F02;&#x5E38;&#x901A;&#x77E5;&#x548C;&#x5B8C;&#x6210;&#x901A;&#x77E5;&#x53EA;&#x80FD;&#x9009;&#x62E9;&#x5176;&#x4E2D;&#x4E00;&#x4E2A;&#xFF0C;&#x53D1;&#x5C04;&#x6570;&#x636E;&#x53EA;&#x80FD;&#x77E5;&#x5B8C;&#x6210;&#x901A;&#x77E5;&#x6216;&#x8005;&#x5F02;&#x5E38;&#x901A;&#x77E5;&#x4E4B;&#x524D;&#xFF0C;&#x5426;&#x5219;&#x53D1;&#x9001;&#x6570;&#x636E;&#x65E0;&#x6548;</strong></p>
+<pre><code>Maybe.just(10).subscribe(new MaybeObserver&lt;Integer&gt;() {
+    @Override
+    public void onSubscribe(Disposable d) {
+        if (d != null) {
+            System.out.println(&quot;onSubscribe:&quot; + d.isDisposed());
+        }
+    }
+
+    @Override
+    public void onSuccess(Integer integer) {
+        System.out.println(&quot;onSuccess:&quot; + integer);
+    }
+
+    @Override
+    public void onError(Throwable e) {
+        System.out.println(&quot;onError:&quot; + e);
+    }
+
+    @Override
+    public void onComplete() {
+        System.out.println(&quot;onComplete&quot;);
+    }
+        });
+</code></pre><pre><code>&#x6253;&#x5370;&#x7ED3;&#x679C;&#xFF1A;
+onSubscribe:true
+onSuccess:10
+</code></pre><pre><code>Maybe.empty().subscribe(new MaybeObserver&lt;Object&gt;() {
+    @Override
+    public void onSubscribe(Disposable d) {
+        System.out.println(&quot;onSubscribe:&quot; + d);
+    }
+
+    @Override
+    public void onSuccess(Object o) {
+        System.out.println(&quot;onSuccess:&quot; + o);
+    }
+
+    @Override
+    public void onError(Throwable e) {
+        System.out.println(&quot;onError:&quot; + e);
+    }
+
+    @Override
+    public void onComplete() {
+        System.out.println(&quot;onComplete&quot;);
+    }
+});
+</code></pre><pre><code>&#x7ED3;&#x679C;&#x6253;&#x5370;&#xFF1A;
+onSubscribe:INSTANCE
+onComplete
+</code></pre><p>&#x770B;&#x770B;&#x4EE3;&#x7801;&#x7684;&#x8C03;&#x7528;&#x6BD4;&#x8F83;&#x7B80;&#x5355;&#xFF0C;&#x8FD9;&#x91CC;&#x5C31;&#x76F4;&#x63A5;&#x53BB;&#x770B;&#x6E90;&#x7801;&#xFF1A;</p>
+<pre><code>public static &lt;T&gt; Maybe&lt;T&gt; just(T item) {
+    ObjectHelper.requireNonNull(item, &quot;item is null&quot;);
+    return RxJavaPlugins.onAssembly(new MaybeJust&lt;T&gt;(item));
+}
+</code></pre><p>Maybe&#x53EA;&#x80FD;&#x4F7F;&#x7528;&#x5355;&#x53C2;&#x6570;&#x7684;just&#xFF0C;&#x7136;&#x540E;&#x5728;just&#x4E2D;&#x8FD4;&#x56DE;&#x4E86;&#x4E00;&#x4E2A;MaybeJust</p>
+<pre><code>public MaybeJust(T value) {
+    this.value = value;
+}
+</code></pre><p>&#x5C06;just&#x4F20;&#x5165;&#x7684;&#x503C;&#x8FDB;&#x884C;&#x4E86;&#x4FDD;&#x5B58;
+&#x7136;&#x540E;&#x5728;&#x8BA2;&#x9605;&#x65B9;&#x6CD5;subscribe&#x4E2D;,&#x4F20;&#x5165;&#x4E86;MaybeObserver</p>
+<pre><code>public final void subscribe(MaybeObserver&lt;? super T&gt; observer) {
+    ...
+    subscribeActual(observer);
+    ...
+}
+</code></pre><p>&#x8FD8;&#x662F;&#x4E00;&#x5982;&#x65E2;&#x5F80;&#x7684;&#x8C03;&#x7528;subscribeActual(observer);
+&#x4E5F;&#x5C31;&#x662F;&#x4E0A;&#x4E00;&#x4E2A;&#x88AB;&#x89C2;&#x5BDF;&#x8005;MaybeJust&#x7684;subscribeActual&#x65B9;&#x6CD5;</p>
+<pre><code>@Override
+protected void subscribeActual(MaybeObserver&lt;? super T&gt; observer) {
+    observer.onSubscribe(Disposables.disposed());
+    observer.onSuccess(value);
+}
+</code></pre><pre><code>public interface MaybeObserver&lt;T&gt; {
+    void onSubscribe(@NonNull Disposable d);
+    void onSuccess(@NonNull T t);
+    void onError(@NonNull Throwable e);
+    void onComplete();
+}
+</code></pre><p>&#x8FD9;&#x91CC;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x771F;&#x7684;&#x662F;&#x5F88;&#x5C11;&#xFF0C;MaybeObserver&#x751A;&#x81F3;&#x662F;&#x90FD;&#x6CA1;&#x6709;&#x88AB;&#x5305;&#x88C5;&#xFF0C;&#x76F4;&#x63A5;&#x5C31;&#x8C03;&#x7528;&#x4E86;&#xFF1B;&#x5148;&#x8C03;&#x7528;&#x4E86;&#x4ED6;&#x7684;onSubscribe&#x65B9;&#x6CD5;</p>
+<pre><code>public static Disposable disposed() {
+    return EmptyDisposable.INSTANCE;
+}
+</code></pre><pre><code>public boolean isDisposed() {
+    return this == INSTANCE;
+}
+</code></pre><p>&#x8FD4;&#x56DE;&#x4E00;&#x4E2A;&#x7A7A;&#x7684;&#x5355;&#x4F8B;&#xFF0C;&#x770B;&#x540D;&#x5B57;&#x5C31;&#x77E5;&#x9053;&#xFF0C;&#x662F;&#x4E2A;&#x7A7A;EmptyDisposable&#xFF0C;&#x800C;&#x4E14;isDisposed()&#x65B9;&#x6CD5;&#x4E5F;&#x5F88;&#x660E;&#x663E;&#xFF0C;&#x7EDD;&#x5BF9;&#x7684;true&#xFF1B;
+&#x63A5;&#x7740;&#x770B;subscribeActual&#x65B9;&#x6CD5;&#xFF0C;&#x7136;&#x540E;&#x8C03;&#x7528;&#x4E86;onSuccess&#x65B9;&#x6CD5;&#x5C06;&#x7ED3;&#x679C;&#x8F6C;&#x53D1;&#xFF0C;&#x5C31;&#x6CA1;&#x4E86;&#x3002;
+&#x6E90;&#x7801;&#x5C31;&#x8FD9;&#x4E48;&#x591A;&#x3002;&#x3002;&#x3002;</p>
+<p>&#x518D;&#x770B;&#x770B;empty()&#x65B9;&#x6CD5;</p>
+<pre><code>public static &lt;T&gt; Maybe&lt;T&gt; empty() {
+    return RxJavaPlugins.onAssembly((Maybe&lt;T&gt;)MaybeEmpty.INSTANCE);
+}
+</code></pre><pre><code>public final void subscribe(MaybeObserver&lt;? super T&gt; observer) {
+    ...
+    subscribeActual(observer);
+    ...
+</code></pre><pre><code>public final class MaybeEmpty extends Maybe&lt;Object&gt; implements ScalarCallable&lt;Object&gt; {
+
+    public static final MaybeEmpty INSTANCE = new MaybeEmpty();
+
+    @Override
+    protected void subscribeActual(MaybeObserver&lt;? super Object&gt; observer) {
+        EmptyDisposable.complete(observer);
+    }
+
+    @Override
+    public Object call() {
+        return null; // nulls of ScalarCallable are considered empty sources
+    }
+}
+</code></pre><pre><code>public static void complete(MaybeObserver&lt;?&gt; s) {
+    s.onSubscribe(INSTANCE);
+    s.onComplete();
+}
+</code></pre><p>&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF0C;&#x6E90;&#x7801;&#x66F4;&#x5C11;&#xFF0C;&#x751A;&#x81F3;&#x89C9;&#x5F97;&#x6709;&#x70B9;&#x800D;&#x6211;&#x4EEC;&#xFF0C;&#x5C31;&#x662F;&#x8C03;&#x7528;&#x4E86;onSubscribe&#x65B9;&#x6CD5;&#x548C;onComplete&#x65B9;&#x6CD5;&#xFF0C;&#x4E5F;&#x6CA1;&#x6709;&#x522B;&#x7684;&#x64CD;&#x4F5C;&#x3002;</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="Rxjava2-Single.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: Rxjava2-Single">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Rxjava2-Maybe","level":"1.3.5","depth":2,"previous":{"title":"Rxjava2-Single","level":"1.3.4","depth":2,"path":"RxJava2/Rxjava2-Single.md","ref":"RxJava2/Rxjava2-Single.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["livereload"],"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"RxJava2/Rxjava2-Maybe.md","mtime":"2019-06-03T03:35:22.429Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-06-03T03:35:30.084Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-livereload/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
