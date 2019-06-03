@@ -10,4 +10,5 @@
     * [Rxjava2-Single](RxJava2/Rxjava2-Single.md)
     * [Rxjava2-Maybe](RxJava2/Rxjava2-Maybe.md)
     * [Rxjava2-Completable](RxJava2/Rxjava2-Completable.md)
+    * [Rxjava2-Subject](RxJava2/Rxjava2-Subject.md)
 
