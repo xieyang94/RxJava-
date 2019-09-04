@@ -117,6 +117,7 @@ onNext:4
 onNext:5
 onNext:6
 ...
+//只发送onError
 onSubscribe
 onError
 ```
@@ -304,7 +305,8 @@ public void dispose() {
 ```
 
 可以看到，只有断流之后cancelled才会等于true；
-在subscribeActual中，只要没断流都会加入到list中；最后会调用一个replayrs)方法
+在subscribeActual中，只要没断流都会加入到list中；最后会调用一个replay(rs)方法
+
 ```
 //还挺长
 public void replay(ReplayDisposable<T> rs) {
