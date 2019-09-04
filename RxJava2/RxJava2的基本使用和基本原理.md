@@ -281,7 +281,8 @@ public interface Observer<T> {
 }
 ```
 四个方法，是不是和发射器的那三个方法很像，基本就对应着回调，就是代理模式。
-void onSubscribe(@NonNull Disposable d);这个方法则是一个用于性能优化的方法，可以用来断流。
+
+- void onSubscribe(@NonNull Disposable d);这个方法则是一个用于性能优化的方法，可以用来断流。
 
 回溯看看订阅方法subscribe
 #### subscribe
