@@ -151,19 +151,20 @@ public interface Emitter<T> {
 ```
 
 发射器接口，里面的三个方法是我们常见的三个方法[onNext/onError/onComplete]，一般在被观察者(Observable)中的回调去发射这三个方法（可以看看我们一开始的使用案例）
-void onNext(@NonNull T value)：发射事件，这个可以发射无数次；
-void onError(@NonNull Throwable error)：发射一个错误事件，一旦发射就没有后续发送事件的可能了，这个事件流就断了（就是发射onError之后再发射onNext是不可能了，接收不到）
-void onComplete()：发射一个结束事件；同理onError，而且onError和onComplete是只能发生其中的一个，因为他们都是结束事件流，谁先发射谁就是接收事件的最后一个。
+
+- void onNext(@NonNull T value)：发射事件，这个可以发射无数次；
+- void onError(@NonNull Throwable error)：发射一个错误事件，一旦发射就没有后续发送事件的可能了，这个事件流就断了（就是发射onError之后再发射onNext是不可能了，接收不到）
+- void onComplete()：发射一个结束事件；同理onError，而且onError和onComplete是只能发生其中的一个，因为他们都是结束事件流，谁先发射谁就是接收事件的最后一个。
 
 > 发射和接收是不相关的，你可以发射N个事件，但是如果Observer已经关闭了这个流，则不管怎么发送也接收不到了
 
 现在我们追到底了，然后回溯；ObservableEmitter继承自Emitter，在这三个方法的基础上增加了[setDisposable/setCancellable/isDisposed/serialize/tryOnError]这五个方法
 
-setDisposable：设置一个Disposable
-setCancellable：设置一个Cancelable
-isDisposed：判断是否已经断流
-serialize：序列化
-tryOnError：
+- setDisposable：设置一个Disposable
+- setCancellable：设置一个Cancelable
+- isDisposed：判断是否已经断流
+- serialize：序列化
+- tryOnError：
 
 再往上追溯我们就回来了create参数那；
 
