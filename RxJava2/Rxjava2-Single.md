@@ -45,7 +45,7 @@ emitter.onSuccess(6);
 emitter.onError(new Exception("test exception"));
 ```
 ```
-打印结果:
+打印结果://这里的6不好误会为第二个数字6，因为上面用到了map操作符，做了*3操作，2*3=6；
 6
 ```
 ```
