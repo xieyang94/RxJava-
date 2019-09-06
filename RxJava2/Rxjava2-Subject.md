@@ -982,7 +982,470 @@ false
 //例子中一开始是3，然后第一个参数是3，则参数相同返回true，并设置值为4（第二个参数）；然后又做了一次操作，这次4和2不同则返回false，值不变还是4；
 ```
 
+
+
+-------------------2019/09/06补充--------------------
+
+还是从案例出发：
+```
+@Test
+    public void test15() {
+        BehaviorSubject<String> subject = BehaviorSubject.createDefault("default");
+        subject.onNext("1");
+        subject.onNext("2");
+        subject.onNext("3");
+//        subject.onError(new Exception("11111111111"));
+        Observer observer =new Observer<String>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                System.out.println("onSubscribe");
+            }
+
+            @Override
+            public void onNext(String s) {
+                System.out.println("onNext:" + s);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                System.out.println("onError");
+            }
+
+            @Override
+            public void onComplete() {
+                System.out.println("onComplete");
+            }
+        };
+        subject.subscribe(observer);
+        subject.subscribe(observer);
+
+        try {
+            Thread.sleep(3000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        subject.onNext("4");
+        subject.onNext("5");
+        subject.onNext("6");
+    }
+```
+```
+onSubscribe
+onNext:3
+onSubscribe
+onNext:3
+onNext:4
+onNext:4
+onNext:5
+onNext:5
+onNext:6
+onNext:6
+```
+按照代码调用的顺序来说；
+首先创建一个BehaviorSubject：
+```
+BehaviorSubject<String> subject = BehaviorSubject.createDefault("default");
+```
+```
+@CheckReturnValue
+public static <T> BehaviorSubject<T> createDefault(T defaultValue) {
+    return new BehaviorSubject<T>(defaultValue);
+}
+```
+```
+BehaviorSubject(T defaultValue) {
+    this();
+    this.value.lazySet(ObjectHelper.requireNonNull(defaultValue, "defaultValue is null"));
+}
+```
+```
+BehaviorSubject() {
+    this.lock = new ReentrantReadWriteLock();
+    this.readLock = lock.readLock();
+    this.writeLock = lock.writeLock();
+    this.subscribers = new AtomicReference<BehaviorDisposable<T>[]>(EMPTY);
+    this.value = new AtomicReference<Object>();
+    this.terminalEvent = new AtomicReference<Throwable>();
+}
+```
+```
+public static <T> T requireNonNull(T object, String message) {
+    if (object == null) {
+        throw new NullPointerException(message);
+    }
+    return object;
+}
+```
+一开始就是构造重载，创建了一个BehaviorSubject对象；给了一个默认值，没给就是无参构造，如果给了一个null，那就是空指针异常；
+再说说构造函数中的几个赋值参数；
+```
+this.lock = new ReentrantReadWriteLock();
+this.readLock = lock.readLock();
+this.writeLock = lock.writeLock();
+```
+这是一个排它锁；我抄了一段概念：(*https://www.cnblogs.com/zaizhoumo/p/7782941.html*)
+> ReentrantReadWriteLock是Lock的另一种实现方式，我们已经知道了ReentrantLock是一个排他锁，同一时间只允许一个线程访问，而ReentrantReadWriteLock允许多个读线程同时访问，但不允许写线程和读线程、写线程和写线程同时访问。相对于排他锁，提高了并发性。在实际应用中，大部分情况下对共享数据（如缓存）的访问都是读操作远多于写操作，这时ReentrantReadWriteLock能够提供比排他锁更好的并发性和吞吐量。
+> 读写锁内部维护了两个锁，一个用于读操作，一个用于写操作。所有 ReadWriteLock实现都必须保证 writeLock操作的内存同步效果也要保持与相关 readLock的联系。也就是说，成功获取读锁的线程会看到写入锁之前版本所做的所有更新。
+> ReentrantReadWriteLock支持以下功能：
+> 1）支持公平和非公平的获取锁的方式；
+> 2）支持可重入。读线程在获取了读锁后还可以获取读锁；写线程在获取了写锁之后既可以再次获取写锁又可以获取读锁；
+> 3）还允许从写入锁降级为读取锁，其实现方式是：先获取写入锁，然后获取读取锁，最后释放写入锁。但是，从读取锁升级到写入锁是不允许的；
+> 4）读取锁和写入锁都支持锁获取期间的中断；
+> 5）Condition支持。仅写入锁提供了一个 Conditon 实现；读取锁不支持 Conditon ，readLock().newCondition()会抛出UnsupportedOperationException。 
+
+以上重点关注一句话：**ReentrantReadWriteLock允许多个读线程同时访问，但不允许写线程和读线程、写线程和写线程同时访问**  ；意思就是丫一群线程过来读，没事，但凡碰到写，排队去；
+
+```
+this.subscribers = new AtomicReference<BehaviorDisposable<T>[]>(EMPTY);
+```
+
+这个是用来装载观察者的，就是可以订阅多个观察者；和ReplaySubject差不多，也是一个原子引用里面装着BehaviorDisposable数组；
+```
+this.value = new AtomicReference<Object>();
+```
+这个是原子引用中始终装最新onNext中发射的事件值；看到这个是不是就对这整个BehaviorSubject有了个大概了解；
+订阅的时候直接把之前那个最新的发射出来，这不就是对这BehaviorSubject整个的诠释吗：发送订阅前发射的最后一个数据和订阅后的全部数据；
+```
+this.terminalEvent = new AtomicReference<Throwable>();
+```
+terminalEvent也是个原子引用，原子引用他有个特点，就是他的初始值为null；这里的null不是说引用，是值（value）；
+它在整个BehaviorSubject中只有两个地方赋值，你应该懂得：onComplete/onError；
+在onError中：
+```
+//t是Throwable
+terminalEvent.compareAndSet(null, t)；
+```
+在onComplete中：
+```
+terminalEvent.compareAndSet(null, ExceptionHelper.TERMINATED)；
+```
+然后在使用的时候，碰到就判断值是否为null，不为null，那可能是onComplete/onError事件发射了；
+
+还是按照代码调用的顺序来说：
+```
+subject.onNext("1");
+subject.onNext("2");
+subject.onNext("3");
+```
+
+```
+public void onNext(T t) {
+    //空判断
+    ObjectHelper.requireNonNull(t, "onNext called with null. Null values are generally not allowed in 2.x operators and sources.");
+    //它来了，判断是否发射onComplete/onError，发射后就没有后续了；
+    if (terminalEvent.get() != null) {
+        return;
+    }
+    //获取这个发射事件值
+    Object o = NotificationLite.next(t);
+    //将value赋值为当前最新的发射事件值
+    setCurrent(o);
+    //这个和ReplaySubject基本上长差不多；作用也一样，就是遍历所有的观察者，然后回调他们的onNext方法；
+    for (BehaviorDisposable<T> bs : subscribers.get()) {
+        bs.emitNext(o, index);
+    }
+}
+```
+```
+void setCurrent(Object o) {
+    writeLock.lock();
+    try {
+        index++;
+        value.lazySet(o);
+    } finally {
+        writeLock.unlock();
+    }
+}
+```
+上面的代码就是有一个加锁、释放锁的过程；里面的内容就是索引做了+1操作；对value做了设置值操作（赋新值）；
+这里的index是做什么的呢？我们先放放
+
+onNext最后的那个for循环暂时跑不起来，因为还没有订阅，subscribers中的数组还是个空数组；所以也先方法；
+这里跟着代码走，3个onNext过去，就是index=3了；
+开始订阅；
+```
+Observer observer =new Observer<String>() {
+    @Override
+    public void onSubscribe(Disposable d) {
+        System.out.println("onSubscribe");
+    }
+
+    @Override
+    public void onNext(String s) {
+        System.out.println("onNext:" + s);
+    }
+
+    @Override
+    public void onError(Throwable e) {
+        System.out.println("onError");
+    }
+
+    @Override
+    public void onComplete() {
+        System.out.println("onComplete");
+    }
+};
+subject.subscribe(observer);
+subject.subscribe(observer);
+```
+这里执行了两次订阅；
+关于订阅，一如既往的调用subscribeActual；
+```
+protected void subscribeActual(Observer<? super T> observer) {
+    /
+    BehaviorDisposable<T> bs = new BehaviorDisposable<T>(observer, this);
+    //触发onSubscribe
+    observer.onSubscribe(bs);
+    //做添加观察者操作，添加成功则执行if里面的语句
+    if (add(bs)) {
+        //这个cancelled应该也看的眼熟，和ReplaySubject里面一样，是在onComplete/onError中做了断流操作的标签；这里就是如果此时执行了onComplete/onError，则直接return；没有后续
+        if (bs.cancelled) {
+            remove(bs);
+        } else {
+            //否则就发射我们订阅之前的发射的onNext数据
+            bs.emitFirst();
+        }
+    } else {
+        //如果添加失败，那就是执行了onComplete/onError，直接回调对应的onComplete/onError，凭啥确定执行失败就是执行了onComplete/onError导致的呢？那就看看上面这个if中的add方法
+        Throwable ex = terminalEvent.get();
+        if (ex == ExceptionHelper.TERMINATED) {
+            observer.onComplete();
+        } else {
+            observer.onError(ex);
+        }
+    }
+}
+```
+```
+boolean add(BehaviorDisposable<T> rs) {
+    for (;;) {
+        //获取当前的观察者列表
+        BehaviorDisposable<T>[] a = subscribers.get();
+        //这里就是add失败的地方；那a啥时候等于TERMINATED，当调用terminate方法的时候；那啥时候调用呢？onError/onComplete的时候，是不是都对上了；
+        //在订阅的时候走else语句就属于比较憋屈的一种，人家在订阅之前就发射了onComplete/onError，你订不订阅都没后续；只不过是将onSubscribe和 onComplete回调了一下；
+        if (a == TERMINATED) {
+            return false;
+        }
+        //获取观察者的长度
+        int len = a.length;
+        @SuppressWarnings("unchecked")
+        //这线面的3行代码就是搞一个新数组，做+1扩容，然后将新的观察者添加到数组；
+        BehaviorDisposable<T>[] b = new BehaviorDisposable[len + 1];
+        System.arraycopy(a, 0, b, 0, len);
+        b[len] = rs;
+        //做更改成功判断；
+        if (subscribers.compareAndSet(a, b)) {
+            return true;
+        }
+    }
+}
+```
+添加成功后里面又是一个if-else，remove方法和ReplaySubject完全一样
+```
+    void remove(BehaviorDisposable<T> rs) {
+        for (;;) {
+            //获取观察者数组
+            BehaviorDisposable<T>[] a = subscribers.get();
+            //判断数组的状态，是已经结束状态还是空数组状态
+            if (a == TERMINATED || a == EMPTY) {
+                return;
+            }
+            //获取当前观察者在数组中的索引
+            int len = a.length;
+            int j = -1;
+            for (int i = 0; i < len; i++) {
+                if (a[i] == rs) {
+                    j = i;
+                    break;
+                }
+            }
+
+            if (j < 0) {
+                return;
+            }
+            //从当前数组中移除该观察者；
+            BehaviorDisposable<T>[] b;
+            if (len == 1) {
+                b = EMPTY;
+            } else {
+                b = new BehaviorDisposable[len - 1];
+                System.arraycopy(a, 0, b, 0, j);
+                System.arraycopy(a, j + 1, b, j, len - j - 1);
+            }
+            //做更新是否成功状态判断
+            if (subscribers.compareAndSet(a, b)) {
+                return;
+            }
+        }
+    }
+```
+如果一切顺利，则走emitFirst方法
+```
+        void emitFirst() {
+            //事件结束判断
+            if (cancelled) {
+                return;
+            }
+            Object o;
+            synchronized (this) {
+                if (cancelled) {
+                    return;
+                }
+                if (next) {
+                    return;
+                }
+
+                //获取被观察者
+                BehaviorSubject<T> s = state;
+                //获取读锁
+                Lock lock = s.readLock;
+                
+                //锁
+                lock.lock();
+                //获取之前的发射事件个数，之前是3
+                index = s.index;
+                //获取当前最新值
+                o = s.value.get();
+                //释放锁
+                lock.unlock();
+                
+                emitting = o != null;
+                next = true;
+            }
+
+            if (o != null) {
+                //调用test方法
+                if (test(o)) {
+                    return;
+                }
+
+                emitLoop();
+            }
+        }
+```
+```
+public boolean test(Object o) {
+    return cancelled || NotificationLite.accept(o, actual);
+}
+```
+```
+public static <T> boolean accept(Object o, Observer<? super T> s) {
+    //判断当前事件类型，根据不同类型发射onComplete/onErroe/onNext，这里就把之前我们最后发射的那个onNext发射出来了
+    if (o == COMPLETE) {
+        s.onComplete();
+        return true;
+    } else
+    if (o instanceof ErrorNotification) {
+        s.onError(((ErrorNotification)o).e);
+        return true;
+    }
+    s.onNext((T)o);
+    return false;
+}
+```
+只要上面的执行了onComplete/onError，或者断流，则这里就结束了，否则还有emitLoop
+```
+void emitLoop() {
+    for (;;) {
+        if (cancelled) {
+            return;
+        }
+        AppendOnlyLinkedArrayList<Object> q;
+        synchronized (this) {
+            q = queue;
+            if (q == null) {
+                emitting = false;
+                return;
+            }
+            queue = null;
+        }
+
+        q.forEachWhile(this);
+    }
+}
+```
+```
+public void forEachWhile(NonThrowingPredicate<? super T> consumer) {
+    Object[] a = head;
+    final int c = capacity;
+    while (a != null) {
+        for (int i = 0; i < c; i++) {
+            Object o = a[i];
+            if (o == null) {
+                break;
+            }
+            if (consumer.test((T)o)) {
+                break;
+            }
+        }
+        a = (Object[])a[c];
+    }
+}
+```
+这一块暂时看不出来是干啥的，大概意思就是for循环遍历这个queue，发射onNext事件，还没搞懂是干嘛的；
+
+再往下走，又是3个onNext
+```
+subject.onNext("4");
+subject.onNext("5");
+subject.onNext("6");
+```
+这一次就主要看onNext中的for循环了
+```
+for (BehaviorDisposable<T> bs : subscribers.get()) {
+    bs.emitNext(o, index);
+}
+```
+触发了emitNext：
+```
+void emitNext(Object value, long stateIndex) {
+    if (cancelled) {
+        return;
+    }
+    //这个fastPath，看到的是，这里面的方法只执行了一次，后续就执行了test了，test我们讲过了，和之前一样，根据事件类型调用onComplete/onErrir/onNext
+    if (!fastPath) {
+        synchronized (this) {
+            if (cancelled) {
+                return;
+            }
+            //这里index在emitFirst中进行了赋值，赋值就是在订阅之前的事件数量，而后续的stateIndex是在这个的基础上不断+1的，所以正常情况下不会等于，那等于是什么情况呢？
+            if (index == stateIndex) {
+                return;
+            }
+            //要执行里面的代码，就要emitting=true，但是要它为true，只有一种可能就是我们onNext传入的值为null，但是如果我们传入null，在onNext中一开始就会抛出异常，所以这里正常情况下也不会执行到，如果执行不到那queue的大小就始终是空，那之前的那个emitLoop中的循环就不可能执行到了；
+            //所以这连续的一块到底表达的是什么意思，还不太懂；
+            if (emitting) {
+                AppendOnlyLinkedArrayList<Object> q = queue;
+                if (q == null) {
+                    q = new AppendOnlyLinkedArrayList<Object>(4);
+                    queue = q;
+                }
+                q.add(value);
+                return;
+            }
+            next = true;
+        }
+        fastPath = true;
+    }
+
+    test(value);
+}
+```
+
+这几个属性还是很疑惑不知道是干啥的
+```
+boolean next;
+boolean emitting;
+AppendOnlyLinkedArrayList<Object> queue;
+boolean fastPath;
+long index;
+```
+
+
+
 **PublishSubject**
+
 ```
 final AtomicReference<PublishDisposable<T>[]> subscribers;
 static final PublishDisposable[] EMPTY = new PublishDisposable[0];

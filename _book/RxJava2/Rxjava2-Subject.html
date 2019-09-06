@@ -1155,6 +1155,398 @@ false
 4
 //&#x5982;&#x679C;&#x7B2C;&#x4E00;&#x4E2A;&#x53C2;&#x6570;&#x548C;&#x4E4B;&#x524D;&#x7684;&#x503C;&#x76F8;&#x540C;&#x5219;&#x8FD4;&#x56DE;true&#xFF0C;&#x5E76;&#x5C06;&#x503C;&#x8BBE;&#x7F6E;&#x4E3A;&#x7B2C;&#x4E8C;&#x4E2A;&#x53C2;&#x6570;&#xFF1B;
 //&#x4F8B;&#x5B50;&#x4E2D;&#x4E00;&#x5F00;&#x59CB;&#x662F;3&#xFF0C;&#x7136;&#x540E;&#x7B2C;&#x4E00;&#x4E2A;&#x53C2;&#x6570;&#x662F;3&#xFF0C;&#x5219;&#x53C2;&#x6570;&#x76F8;&#x540C;&#x8FD4;&#x56DE;true&#xFF0C;&#x5E76;&#x8BBE;&#x7F6E;&#x503C;&#x4E3A;4&#xFF08;&#x7B2C;&#x4E8C;&#x4E2A;&#x53C2;&#x6570;&#xFF09;&#xFF1B;&#x7136;&#x540E;&#x53C8;&#x505A;&#x4E86;&#x4E00;&#x6B21;&#x64CD;&#x4F5C;&#xFF0C;&#x8FD9;&#x6B21;4&#x548C;2&#x4E0D;&#x540C;&#x5219;&#x8FD4;&#x56DE;false&#xFF0C;&#x503C;&#x4E0D;&#x53D8;&#x8FD8;&#x662F;4&#xFF1B;
+</code></pre><p>-------------------2019/09/06&#x8865;&#x5145;--------------------</p>
+<p>&#x8FD8;&#x662F;&#x4ECE;&#x6848;&#x4F8B;&#x51FA;&#x53D1;&#xFF1A;</p>
+<pre><code>@Test
+    public void test15() {
+        BehaviorSubject&lt;String&gt; subject = BehaviorSubject.createDefault(&quot;default&quot;);
+        subject.onNext(&quot;1&quot;);
+        subject.onNext(&quot;2&quot;);
+        subject.onNext(&quot;3&quot;);
+//        subject.onError(new Exception(&quot;11111111111&quot;));
+        Observer observer =new Observer&lt;String&gt;() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                System.out.println(&quot;onSubscribe&quot;);
+            }
+
+            @Override
+            public void onNext(String s) {
+                System.out.println(&quot;onNext:&quot; + s);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                System.out.println(&quot;onError&quot;);
+            }
+
+            @Override
+            public void onComplete() {
+                System.out.println(&quot;onComplete&quot;);
+            }
+        };
+        subject.subscribe(observer);
+        subject.subscribe(observer);
+
+        try {
+            Thread.sleep(3000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        subject.onNext(&quot;4&quot;);
+        subject.onNext(&quot;5&quot;);
+        subject.onNext(&quot;6&quot;);
+    }
+</code></pre><pre><code>onSubscribe
+onNext:3
+onSubscribe
+onNext:3
+onNext:4
+onNext:4
+onNext:5
+onNext:5
+onNext:6
+onNext:6
+</code></pre><p>&#x6309;&#x7167;&#x4EE3;&#x7801;&#x8C03;&#x7528;&#x7684;&#x987A;&#x5E8F;&#x6765;&#x8BF4;&#xFF1B;
+&#x9996;&#x5148;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;BehaviorSubject&#xFF1A;</p>
+<pre><code>BehaviorSubject&lt;String&gt; subject = BehaviorSubject.createDefault(&quot;default&quot;);
+</code></pre><pre><code>@CheckReturnValue
+public static &lt;T&gt; BehaviorSubject&lt;T&gt; createDefault(T defaultValue) {
+    return new BehaviorSubject&lt;T&gt;(defaultValue);
+}
+</code></pre><pre><code>BehaviorSubject(T defaultValue) {
+    this();
+    this.value.lazySet(ObjectHelper.requireNonNull(defaultValue, &quot;defaultValue is null&quot;));
+}
+</code></pre><pre><code>BehaviorSubject() {
+    this.lock = new ReentrantReadWriteLock();
+    this.readLock = lock.readLock();
+    this.writeLock = lock.writeLock();
+    this.subscribers = new AtomicReference&lt;BehaviorDisposable&lt;T&gt;[]&gt;(EMPTY);
+    this.value = new AtomicReference&lt;Object&gt;();
+    this.terminalEvent = new AtomicReference&lt;Throwable&gt;();
+}
+</code></pre><pre><code>public static &lt;T&gt; T requireNonNull(T object, String message) {
+    if (object == null) {
+        throw new NullPointerException(message);
+    }
+    return object;
+}
+</code></pre><p>&#x4E00;&#x5F00;&#x59CB;&#x5C31;&#x662F;&#x6784;&#x9020;&#x91CD;&#x8F7D;&#xFF0C;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;BehaviorSubject&#x5BF9;&#x8C61;&#xFF1B;&#x7ED9;&#x4E86;&#x4E00;&#x4E2A;&#x9ED8;&#x8BA4;&#x503C;&#xFF0C;&#x6CA1;&#x7ED9;&#x5C31;&#x662F;&#x65E0;&#x53C2;&#x6784;&#x9020;&#xFF0C;&#x5982;&#x679C;&#x7ED9;&#x4E86;&#x4E00;&#x4E2A;null&#xFF0C;&#x90A3;&#x5C31;&#x662F;&#x7A7A;&#x6307;&#x9488;&#x5F02;&#x5E38;&#xFF1B;
+&#x518D;&#x8BF4;&#x8BF4;&#x6784;&#x9020;&#x51FD;&#x6570;&#x4E2D;&#x7684;&#x51E0;&#x4E2A;&#x8D4B;&#x503C;&#x53C2;&#x6570;&#xFF1B;</p>
+<pre><code>this.lock = new ReentrantReadWriteLock();
+this.readLock = lock.readLock();
+this.writeLock = lock.writeLock();
+</code></pre><p>&#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x6392;&#x5B83;&#x9501;&#xFF1B;&#x6211;&#x6284;&#x4E86;&#x4E00;&#x6BB5;&#x6982;&#x5FF5;&#xFF1A;(<em><a href="https://www.cnblogs.com/zaizhoumo/p/7782941.html" target="_blank">https://www.cnblogs.com/zaizhoumo/p/7782941.html</a></em>)</p>
+<blockquote>
+<p>ReentrantReadWriteLock&#x662F;Lock&#x7684;&#x53E6;&#x4E00;&#x79CD;&#x5B9E;&#x73B0;&#x65B9;&#x5F0F;&#xFF0C;&#x6211;&#x4EEC;&#x5DF2;&#x7ECF;&#x77E5;&#x9053;&#x4E86;ReentrantLock&#x662F;&#x4E00;&#x4E2A;&#x6392;&#x4ED6;&#x9501;&#xFF0C;&#x540C;&#x4E00;&#x65F6;&#x95F4;&#x53EA;&#x5141;&#x8BB8;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x8BBF;&#x95EE;&#xFF0C;&#x800C;ReentrantReadWriteLock&#x5141;&#x8BB8;&#x591A;&#x4E2A;&#x8BFB;&#x7EBF;&#x7A0B;&#x540C;&#x65F6;&#x8BBF;&#x95EE;&#xFF0C;&#x4F46;&#x4E0D;&#x5141;&#x8BB8;&#x5199;&#x7EBF;&#x7A0B;&#x548C;&#x8BFB;&#x7EBF;&#x7A0B;&#x3001;&#x5199;&#x7EBF;&#x7A0B;&#x548C;&#x5199;&#x7EBF;&#x7A0B;&#x540C;&#x65F6;&#x8BBF;&#x95EE;&#x3002;&#x76F8;&#x5BF9;&#x4E8E;&#x6392;&#x4ED6;&#x9501;&#xFF0C;&#x63D0;&#x9AD8;&#x4E86;&#x5E76;&#x53D1;&#x6027;&#x3002;&#x5728;&#x5B9E;&#x9645;&#x5E94;&#x7528;&#x4E2D;&#xFF0C;&#x5927;&#x90E8;&#x5206;&#x60C5;&#x51B5;&#x4E0B;&#x5BF9;&#x5171;&#x4EAB;&#x6570;&#x636E;&#xFF08;&#x5982;&#x7F13;&#x5B58;&#xFF09;&#x7684;&#x8BBF;&#x95EE;&#x90FD;&#x662F;&#x8BFB;&#x64CD;&#x4F5C;&#x8FDC;&#x591A;&#x4E8E;&#x5199;&#x64CD;&#x4F5C;&#xFF0C;&#x8FD9;&#x65F6;ReentrantReadWriteLock&#x80FD;&#x591F;&#x63D0;&#x4F9B;&#x6BD4;&#x6392;&#x4ED6;&#x9501;&#x66F4;&#x597D;&#x7684;&#x5E76;&#x53D1;&#x6027;&#x548C;&#x541E;&#x5410;&#x91CF;&#x3002;
+&#x8BFB;&#x5199;&#x9501;&#x5185;&#x90E8;&#x7EF4;&#x62A4;&#x4E86;&#x4E24;&#x4E2A;&#x9501;&#xFF0C;&#x4E00;&#x4E2A;&#x7528;&#x4E8E;&#x8BFB;&#x64CD;&#x4F5C;&#xFF0C;&#x4E00;&#x4E2A;&#x7528;&#x4E8E;&#x5199;&#x64CD;&#x4F5C;&#x3002;&#x6240;&#x6709; ReadWriteLock&#x5B9E;&#x73B0;&#x90FD;&#x5FC5;&#x987B;&#x4FDD;&#x8BC1; writeLock&#x64CD;&#x4F5C;&#x7684;&#x5185;&#x5B58;&#x540C;&#x6B65;&#x6548;&#x679C;&#x4E5F;&#x8981;&#x4FDD;&#x6301;&#x4E0E;&#x76F8;&#x5173; readLock&#x7684;&#x8054;&#x7CFB;&#x3002;&#x4E5F;&#x5C31;&#x662F;&#x8BF4;&#xFF0C;&#x6210;&#x529F;&#x83B7;&#x53D6;&#x8BFB;&#x9501;&#x7684;&#x7EBF;&#x7A0B;&#x4F1A;&#x770B;&#x5230;&#x5199;&#x5165;&#x9501;&#x4E4B;&#x524D;&#x7248;&#x672C;&#x6240;&#x505A;&#x7684;&#x6240;&#x6709;&#x66F4;&#x65B0;&#x3002;
+ReentrantReadWriteLock&#x652F;&#x6301;&#x4EE5;&#x4E0B;&#x529F;&#x80FD;&#xFF1A;
+1&#xFF09;&#x652F;&#x6301;&#x516C;&#x5E73;&#x548C;&#x975E;&#x516C;&#x5E73;&#x7684;&#x83B7;&#x53D6;&#x9501;&#x7684;&#x65B9;&#x5F0F;&#xFF1B;
+2&#xFF09;&#x652F;&#x6301;&#x53EF;&#x91CD;&#x5165;&#x3002;&#x8BFB;&#x7EBF;&#x7A0B;&#x5728;&#x83B7;&#x53D6;&#x4E86;&#x8BFB;&#x9501;&#x540E;&#x8FD8;&#x53EF;&#x4EE5;&#x83B7;&#x53D6;&#x8BFB;&#x9501;&#xFF1B;&#x5199;&#x7EBF;&#x7A0B;&#x5728;&#x83B7;&#x53D6;&#x4E86;&#x5199;&#x9501;&#x4E4B;&#x540E;&#x65E2;&#x53EF;&#x4EE5;&#x518D;&#x6B21;&#x83B7;&#x53D6;&#x5199;&#x9501;&#x53C8;&#x53EF;&#x4EE5;&#x83B7;&#x53D6;&#x8BFB;&#x9501;&#xFF1B;
+3&#xFF09;&#x8FD8;&#x5141;&#x8BB8;&#x4ECE;&#x5199;&#x5165;&#x9501;&#x964D;&#x7EA7;&#x4E3A;&#x8BFB;&#x53D6;&#x9501;&#xFF0C;&#x5176;&#x5B9E;&#x73B0;&#x65B9;&#x5F0F;&#x662F;&#xFF1A;&#x5148;&#x83B7;&#x53D6;&#x5199;&#x5165;&#x9501;&#xFF0C;&#x7136;&#x540E;&#x83B7;&#x53D6;&#x8BFB;&#x53D6;&#x9501;&#xFF0C;&#x6700;&#x540E;&#x91CA;&#x653E;&#x5199;&#x5165;&#x9501;&#x3002;&#x4F46;&#x662F;&#xFF0C;&#x4ECE;&#x8BFB;&#x53D6;&#x9501;&#x5347;&#x7EA7;&#x5230;&#x5199;&#x5165;&#x9501;&#x662F;&#x4E0D;&#x5141;&#x8BB8;&#x7684;&#xFF1B;
+4&#xFF09;&#x8BFB;&#x53D6;&#x9501;&#x548C;&#x5199;&#x5165;&#x9501;&#x90FD;&#x652F;&#x6301;&#x9501;&#x83B7;&#x53D6;&#x671F;&#x95F4;&#x7684;&#x4E2D;&#x65AD;&#xFF1B;
+5&#xFF09;Condition&#x652F;&#x6301;&#x3002;&#x4EC5;&#x5199;&#x5165;&#x9501;&#x63D0;&#x4F9B;&#x4E86;&#x4E00;&#x4E2A; Conditon &#x5B9E;&#x73B0;&#xFF1B;&#x8BFB;&#x53D6;&#x9501;&#x4E0D;&#x652F;&#x6301; Conditon &#xFF0C;readLock().newCondition()&#x4F1A;&#x629B;&#x51FA;UnsupportedOperationException&#x3002; </p>
+</blockquote>
+<p>&#x4EE5;&#x4E0A;&#x91CD;&#x70B9;&#x5173;&#x6CE8;&#x4E00;&#x53E5;&#x8BDD;&#xFF1A;<strong>ReentrantReadWriteLock&#x5141;&#x8BB8;&#x591A;&#x4E2A;&#x8BFB;&#x7EBF;&#x7A0B;&#x540C;&#x65F6;&#x8BBF;&#x95EE;&#xFF0C;&#x4F46;&#x4E0D;&#x5141;&#x8BB8;&#x5199;&#x7EBF;&#x7A0B;&#x548C;&#x8BFB;&#x7EBF;&#x7A0B;&#x3001;&#x5199;&#x7EBF;&#x7A0B;&#x548C;&#x5199;&#x7EBF;&#x7A0B;&#x540C;&#x65F6;&#x8BBF;&#x95EE;</strong>  &#xFF1B;&#x610F;&#x601D;&#x5C31;&#x662F;&#x4E2B;&#x4E00;&#x7FA4;&#x7EBF;&#x7A0B;&#x8FC7;&#x6765;&#x8BFB;&#xFF0C;&#x6CA1;&#x4E8B;&#xFF0C;&#x4F46;&#x51E1;&#x78B0;&#x5230;&#x5199;&#xFF0C;&#x6392;&#x961F;&#x53BB;&#xFF1B;</p>
+<pre><code>this.subscribers = new AtomicReference&lt;BehaviorDisposable&lt;T&gt;[]&gt;(EMPTY);
+</code></pre><p>&#x8FD9;&#x4E2A;&#x662F;&#x7528;&#x6765;&#x88C5;&#x8F7D;&#x89C2;&#x5BDF;&#x8005;&#x7684;&#xFF0C;&#x5C31;&#x662F;&#x53EF;&#x4EE5;&#x8BA2;&#x9605;&#x591A;&#x4E2A;&#x89C2;&#x5BDF;&#x8005;&#xFF1B;&#x548C;ReplaySubject&#x5DEE;&#x4E0D;&#x591A;&#xFF0C;&#x4E5F;&#x662F;&#x4E00;&#x4E2A;&#x539F;&#x5B50;&#x5F15;&#x7528;&#x91CC;&#x9762;&#x88C5;&#x7740;BehaviorDisposable&#x6570;&#x7EC4;&#xFF1B;</p>
+<pre><code>this.value = new AtomicReference&lt;Object&gt;();
+</code></pre><p>&#x8FD9;&#x4E2A;&#x662F;&#x539F;&#x5B50;&#x5F15;&#x7528;&#x4E2D;&#x59CB;&#x7EC8;&#x88C5;&#x6700;&#x65B0;onNext&#x4E2D;&#x53D1;&#x5C04;&#x7684;&#x4E8B;&#x4EF6;&#x503C;&#xFF1B;&#x770B;&#x5230;&#x8FD9;&#x4E2A;&#x662F;&#x4E0D;&#x662F;&#x5C31;&#x5BF9;&#x8FD9;&#x6574;&#x4E2A;BehaviorSubject&#x6709;&#x4E86;&#x4E2A;&#x5927;&#x6982;&#x4E86;&#x89E3;&#xFF1B;
+&#x8BA2;&#x9605;&#x7684;&#x65F6;&#x5019;&#x76F4;&#x63A5;&#x628A;&#x4E4B;&#x524D;&#x90A3;&#x4E2A;&#x6700;&#x65B0;&#x7684;&#x53D1;&#x5C04;&#x51FA;&#x6765;&#xFF0C;&#x8FD9;&#x4E0D;&#x5C31;&#x662F;&#x5BF9;&#x8FD9;BehaviorSubject&#x6574;&#x4E2A;&#x7684;&#x8BE0;&#x91CA;&#x5417;&#xFF1A;&#x53D1;&#x9001;&#x8BA2;&#x9605;&#x524D;&#x53D1;&#x5C04;&#x7684;&#x6700;&#x540E;&#x4E00;&#x4E2A;&#x6570;&#x636E;&#x548C;&#x8BA2;&#x9605;&#x540E;&#x7684;&#x5168;&#x90E8;&#x6570;&#x636E;&#xFF1B;</p>
+<pre><code>this.terminalEvent = new AtomicReference&lt;Throwable&gt;();
+</code></pre><p>terminalEvent&#x4E5F;&#x662F;&#x4E2A;&#x539F;&#x5B50;&#x5F15;&#x7528;&#xFF0C;&#x539F;&#x5B50;&#x5F15;&#x7528;&#x4ED6;&#x6709;&#x4E2A;&#x7279;&#x70B9;&#xFF0C;&#x5C31;&#x662F;&#x4ED6;&#x7684;&#x521D;&#x59CB;&#x503C;&#x4E3A;null&#xFF1B;&#x8FD9;&#x91CC;&#x7684;null&#x4E0D;&#x662F;&#x8BF4;&#x5F15;&#x7528;&#xFF0C;&#x662F;&#x503C;&#xFF08;value&#xFF09;&#xFF1B;
+&#x5B83;&#x5728;&#x6574;&#x4E2A;BehaviorSubject&#x4E2D;&#x53EA;&#x6709;&#x4E24;&#x4E2A;&#x5730;&#x65B9;&#x8D4B;&#x503C;&#xFF0C;&#x4F60;&#x5E94;&#x8BE5;&#x61C2;&#x5F97;&#xFF1A;onComplete/onError&#xFF1B;
+&#x5728;onError&#x4E2D;&#xFF1A;</p>
+<pre><code>//t&#x662F;Throwable
+terminalEvent.compareAndSet(null, t)&#xFF1B;
+</code></pre><p>&#x5728;onComplete&#x4E2D;&#xFF1A;</p>
+<pre><code>terminalEvent.compareAndSet(null, ExceptionHelper.TERMINATED)&#xFF1B;
+</code></pre><p>&#x7136;&#x540E;&#x5728;&#x4F7F;&#x7528;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x78B0;&#x5230;&#x5C31;&#x5224;&#x65AD;&#x503C;&#x662F;&#x5426;&#x4E3A;null&#xFF0C;&#x4E0D;&#x4E3A;null&#xFF0C;&#x90A3;&#x53EF;&#x80FD;&#x662F;onComplete/onError&#x4E8B;&#x4EF6;&#x53D1;&#x5C04;&#x4E86;&#xFF1B;</p>
+<p>&#x8FD8;&#x662F;&#x6309;&#x7167;&#x4EE3;&#x7801;&#x8C03;&#x7528;&#x7684;&#x987A;&#x5E8F;&#x6765;&#x8BF4;&#xFF1A;</p>
+<pre><code>subject.onNext(&quot;1&quot;);
+subject.onNext(&quot;2&quot;);
+subject.onNext(&quot;3&quot;);
+</code></pre><pre><code>public void onNext(T t) {
+    //&#x7A7A;&#x5224;&#x65AD;
+    ObjectHelper.requireNonNull(t, &quot;onNext called with null. Null values are generally not allowed in 2.x operators and sources.&quot;);
+    //&#x5B83;&#x6765;&#x4E86;&#xFF0C;&#x5224;&#x65AD;&#x662F;&#x5426;&#x53D1;&#x5C04;onComplete/onError&#xFF0C;&#x53D1;&#x5C04;&#x540E;&#x5C31;&#x6CA1;&#x6709;&#x540E;&#x7EED;&#x4E86;&#xFF1B;
+    if (terminalEvent.get() != null) {
+        return;
+    }
+    //&#x83B7;&#x53D6;&#x8FD9;&#x4E2A;&#x53D1;&#x5C04;&#x4E8B;&#x4EF6;&#x503C;
+    Object o = NotificationLite.next(t);
+    //&#x5C06;value&#x8D4B;&#x503C;&#x4E3A;&#x5F53;&#x524D;&#x6700;&#x65B0;&#x7684;&#x53D1;&#x5C04;&#x4E8B;&#x4EF6;&#x503C;
+    setCurrent(o);
+    //&#x8FD9;&#x4E2A;&#x548C;ReplaySubject&#x57FA;&#x672C;&#x4E0A;&#x957F;&#x5DEE;&#x4E0D;&#x591A;&#xFF1B;&#x4F5C;&#x7528;&#x4E5F;&#x4E00;&#x6837;&#xFF0C;&#x5C31;&#x662F;&#x904D;&#x5386;&#x6240;&#x6709;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#xFF0C;&#x7136;&#x540E;&#x56DE;&#x8C03;&#x4ED6;&#x4EEC;&#x7684;onNext&#x65B9;&#x6CD5;&#xFF1B;
+    for (BehaviorDisposable&lt;T&gt; bs : subscribers.get()) {
+        bs.emitNext(o, index);
+    }
+}
+</code></pre><pre><code>void setCurrent(Object o) {
+    writeLock.lock();
+    try {
+        index++;
+        value.lazySet(o);
+    } finally {
+        writeLock.unlock();
+    }
+}
+</code></pre><p>&#x4E0A;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x5C31;&#x662F;&#x6709;&#x4E00;&#x4E2A;&#x52A0;&#x9501;&#x3001;&#x91CA;&#x653E;&#x9501;&#x7684;&#x8FC7;&#x7A0B;&#xFF1B;&#x91CC;&#x9762;&#x7684;&#x5185;&#x5BB9;&#x5C31;&#x662F;&#x7D22;&#x5F15;&#x505A;&#x4E86;+1&#x64CD;&#x4F5C;&#xFF1B;&#x5BF9;value&#x505A;&#x4E86;&#x8BBE;&#x7F6E;&#x503C;&#x64CD;&#x4F5C;&#xFF08;&#x8D4B;&#x65B0;&#x503C;&#xFF09;&#xFF1B;
+&#x8FD9;&#x91CC;&#x7684;index&#x662F;&#x505A;&#x4EC0;&#x4E48;&#x7684;&#x5462;&#xFF1F;&#x6211;&#x4EEC;&#x5148;&#x653E;&#x653E;</p>
+<p>onNext&#x6700;&#x540E;&#x7684;&#x90A3;&#x4E2A;for&#x5FAA;&#x73AF;&#x6682;&#x65F6;&#x8DD1;&#x4E0D;&#x8D77;&#x6765;&#xFF0C;&#x56E0;&#x4E3A;&#x8FD8;&#x6CA1;&#x6709;&#x8BA2;&#x9605;&#xFF0C;subscribers&#x4E2D;&#x7684;&#x6570;&#x7EC4;&#x8FD8;&#x662F;&#x4E2A;&#x7A7A;&#x6570;&#x7EC4;&#xFF1B;&#x6240;&#x4EE5;&#x4E5F;&#x5148;&#x65B9;&#x6CD5;&#xFF1B;
+&#x8FD9;&#x91CC;&#x8DDF;&#x7740;&#x4EE3;&#x7801;&#x8D70;&#xFF0C;3&#x4E2A;onNext&#x8FC7;&#x53BB;&#xFF0C;&#x5C31;&#x662F;index=3&#x4E86;&#xFF1B;
+&#x5F00;&#x59CB;&#x8BA2;&#x9605;&#xFF1B;</p>
+<pre><code>Observer observer =new Observer&lt;String&gt;() {
+    @Override
+    public void onSubscribe(Disposable d) {
+        System.out.println(&quot;onSubscribe&quot;);
+    }
+
+    @Override
+    public void onNext(String s) {
+        System.out.println(&quot;onNext:&quot; + s);
+    }
+
+    @Override
+    public void onError(Throwable e) {
+        System.out.println(&quot;onError&quot;);
+    }
+
+    @Override
+    public void onComplete() {
+        System.out.println(&quot;onComplete&quot;);
+    }
+};
+subject.subscribe(observer);
+subject.subscribe(observer);
+</code></pre><p>&#x8FD9;&#x91CC;&#x6267;&#x884C;&#x4E86;&#x4E24;&#x6B21;&#x8BA2;&#x9605;&#xFF1B;
+&#x5173;&#x4E8E;&#x8BA2;&#x9605;&#xFF0C;&#x4E00;&#x5982;&#x65E2;&#x5F80;&#x7684;&#x8C03;&#x7528;subscribeActual&#xFF1B;</p>
+<pre><code>protected void subscribeActual(Observer&lt;? super T&gt; observer) {
+    /
+    BehaviorDisposable&lt;T&gt; bs = new BehaviorDisposable&lt;T&gt;(observer, this);
+    //&#x89E6;&#x53D1;onSubscribe
+    observer.onSubscribe(bs);
+    //&#x505A;&#x6DFB;&#x52A0;&#x89C2;&#x5BDF;&#x8005;&#x64CD;&#x4F5C;&#xFF0C;&#x6DFB;&#x52A0;&#x6210;&#x529F;&#x5219;&#x6267;&#x884C;if&#x91CC;&#x9762;&#x7684;&#x8BED;&#x53E5;
+    if (add(bs)) {
+        //&#x8FD9;&#x4E2A;cancelled&#x5E94;&#x8BE5;&#x4E5F;&#x770B;&#x7684;&#x773C;&#x719F;&#xFF0C;&#x548C;ReplaySubject&#x91CC;&#x9762;&#x4E00;&#x6837;&#xFF0C;&#x662F;&#x5728;onComplete/onError&#x4E2D;&#x505A;&#x4E86;&#x65AD;&#x6D41;&#x64CD;&#x4F5C;&#x7684;&#x6807;&#x7B7E;&#xFF1B;&#x8FD9;&#x91CC;&#x5C31;&#x662F;&#x5982;&#x679C;&#x6B64;&#x65F6;&#x6267;&#x884C;&#x4E86;onComplete/onError&#xFF0C;&#x5219;&#x76F4;&#x63A5;return&#xFF1B;&#x6CA1;&#x6709;&#x540E;&#x7EED;
+        if (bs.cancelled) {
+            remove(bs);
+        } else {
+            //&#x5426;&#x5219;&#x5C31;&#x53D1;&#x5C04;&#x6211;&#x4EEC;&#x8BA2;&#x9605;&#x4E4B;&#x524D;&#x7684;&#x53D1;&#x5C04;&#x7684;onNext&#x6570;&#x636E;
+            bs.emitFirst();
+        }
+    } else {
+        //&#x5982;&#x679C;&#x6DFB;&#x52A0;&#x5931;&#x8D25;&#xFF0C;&#x90A3;&#x5C31;&#x662F;&#x6267;&#x884C;&#x4E86;onComplete/onError&#xFF0C;&#x76F4;&#x63A5;&#x56DE;&#x8C03;&#x5BF9;&#x5E94;&#x7684;onComplete/onError&#xFF0C;&#x51ED;&#x5565;&#x786E;&#x5B9A;&#x6267;&#x884C;&#x5931;&#x8D25;&#x5C31;&#x662F;&#x6267;&#x884C;&#x4E86;onComplete/onError&#x5BFC;&#x81F4;&#x7684;&#x5462;&#xFF1F;&#x90A3;&#x5C31;&#x770B;&#x770B;&#x4E0A;&#x9762;&#x8FD9;&#x4E2A;if&#x4E2D;&#x7684;add&#x65B9;&#x6CD5;
+        Throwable ex = terminalEvent.get();
+        if (ex == ExceptionHelper.TERMINATED) {
+            observer.onComplete();
+        } else {
+            observer.onError(ex);
+        }
+    }
+}
+</code></pre><pre><code>boolean add(BehaviorDisposable&lt;T&gt; rs) {
+    for (;;) {
+        //&#x83B7;&#x53D6;&#x5F53;&#x524D;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x5217;&#x8868;
+        BehaviorDisposable&lt;T&gt;[] a = subscribers.get();
+        //&#x8FD9;&#x91CC;&#x5C31;&#x662F;add&#x5931;&#x8D25;&#x7684;&#x5730;&#x65B9;&#xFF1B;&#x90A3;a&#x5565;&#x65F6;&#x5019;&#x7B49;&#x4E8E;TERMINATED&#xFF0C;&#x5F53;&#x8C03;&#x7528;terminate&#x65B9;&#x6CD5;&#x7684;&#x65F6;&#x5019;&#xFF1B;&#x90A3;&#x5565;&#x65F6;&#x5019;&#x8C03;&#x7528;&#x5462;&#xFF1F;onError/onComplete&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x662F;&#x4E0D;&#x662F;&#x90FD;&#x5BF9;&#x4E0A;&#x4E86;&#xFF1B;
+        //&#x5728;&#x8BA2;&#x9605;&#x7684;&#x65F6;&#x5019;&#x8D70;else&#x8BED;&#x53E5;&#x5C31;&#x5C5E;&#x4E8E;&#x6BD4;&#x8F83;&#x618B;&#x5C48;&#x7684;&#x4E00;&#x79CD;&#xFF0C;&#x4EBA;&#x5BB6;&#x5728;&#x8BA2;&#x9605;&#x4E4B;&#x524D;&#x5C31;&#x53D1;&#x5C04;&#x4E86;onComplete/onError&#xFF0C;&#x4F60;&#x8BA2;&#x4E0D;&#x8BA2;&#x9605;&#x90FD;&#x6CA1;&#x540E;&#x7EED;&#xFF1B;&#x53EA;&#x4E0D;&#x8FC7;&#x662F;&#x5C06;onSubscribe&#x548C; onComplete&#x56DE;&#x8C03;&#x4E86;&#x4E00;&#x4E0B;&#xFF1B;
+        if (a == TERMINATED) {
+            return false;
+        }
+        //&#x83B7;&#x53D6;&#x89C2;&#x5BDF;&#x8005;&#x7684;&#x957F;&#x5EA6;
+        int len = a.length;
+        @SuppressWarnings(&quot;unchecked&quot;)
+        //&#x8FD9;&#x7EBF;&#x9762;&#x7684;3&#x884C;&#x4EE3;&#x7801;&#x5C31;&#x662F;&#x641E;&#x4E00;&#x4E2A;&#x65B0;&#x6570;&#x7EC4;&#xFF0C;&#x505A;+1&#x6269;&#x5BB9;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x65B0;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x6DFB;&#x52A0;&#x5230;&#x6570;&#x7EC4;&#xFF1B;
+        BehaviorDisposable&lt;T&gt;[] b = new BehaviorDisposable[len + 1];
+        System.arraycopy(a, 0, b, 0, len);
+        b[len] = rs;
+        //&#x505A;&#x66F4;&#x6539;&#x6210;&#x529F;&#x5224;&#x65AD;&#xFF1B;
+        if (subscribers.compareAndSet(a, b)) {
+            return true;
+        }
+    }
+}
+</code></pre><p>&#x6DFB;&#x52A0;&#x6210;&#x529F;&#x540E;&#x91CC;&#x9762;&#x53C8;&#x662F;&#x4E00;&#x4E2A;if-else&#xFF0C;remove&#x65B9;&#x6CD5;&#x548C;ReplaySubject&#x5B8C;&#x5168;&#x4E00;&#x6837;</p>
+<pre><code>    void remove(BehaviorDisposable&lt;T&gt; rs) {
+        for (;;) {
+            //&#x83B7;&#x53D6;&#x89C2;&#x5BDF;&#x8005;&#x6570;&#x7EC4;
+            BehaviorDisposable&lt;T&gt;[] a = subscribers.get();
+            //&#x5224;&#x65AD;&#x6570;&#x7EC4;&#x7684;&#x72B6;&#x6001;&#xFF0C;&#x662F;&#x5DF2;&#x7ECF;&#x7ED3;&#x675F;&#x72B6;&#x6001;&#x8FD8;&#x662F;&#x7A7A;&#x6570;&#x7EC4;&#x72B6;&#x6001;
+            if (a == TERMINATED || a == EMPTY) {
+                return;
+            }
+            //&#x83B7;&#x53D6;&#x5F53;&#x524D;&#x89C2;&#x5BDF;&#x8005;&#x5728;&#x6570;&#x7EC4;&#x4E2D;&#x7684;&#x7D22;&#x5F15;
+            int len = a.length;
+            int j = -1;
+            for (int i = 0; i &lt; len; i++) {
+                if (a[i] == rs) {
+                    j = i;
+                    break;
+                }
+            }
+
+            if (j &lt; 0) {
+                return;
+            }
+            //&#x4ECE;&#x5F53;&#x524D;&#x6570;&#x7EC4;&#x4E2D;&#x79FB;&#x9664;&#x8BE5;&#x89C2;&#x5BDF;&#x8005;&#xFF1B;
+            BehaviorDisposable&lt;T&gt;[] b;
+            if (len == 1) {
+                b = EMPTY;
+            } else {
+                b = new BehaviorDisposable[len - 1];
+                System.arraycopy(a, 0, b, 0, j);
+                System.arraycopy(a, j + 1, b, j, len - j - 1);
+            }
+            //&#x505A;&#x66F4;&#x65B0;&#x662F;&#x5426;&#x6210;&#x529F;&#x72B6;&#x6001;&#x5224;&#x65AD;
+            if (subscribers.compareAndSet(a, b)) {
+                return;
+            }
+        }
+    }
+</code></pre><p>&#x5982;&#x679C;&#x4E00;&#x5207;&#x987A;&#x5229;&#xFF0C;&#x5219;&#x8D70;emitFirst&#x65B9;&#x6CD5;</p>
+<pre><code>        void emitFirst() {
+            //&#x4E8B;&#x4EF6;&#x7ED3;&#x675F;&#x5224;&#x65AD;
+            if (cancelled) {
+                return;
+            }
+            Object o;
+            synchronized (this) {
+                if (cancelled) {
+                    return;
+                }
+                if (next) {
+                    return;
+                }
+
+                //&#x83B7;&#x53D6;&#x88AB;&#x89C2;&#x5BDF;&#x8005;
+                BehaviorSubject&lt;T&gt; s = state;
+                //&#x83B7;&#x53D6;&#x8BFB;&#x9501;
+                Lock lock = s.readLock;
+
+                //&#x9501;
+                lock.lock();
+                //&#x83B7;&#x53D6;&#x4E4B;&#x524D;&#x7684;&#x53D1;&#x5C04;&#x4E8B;&#x4EF6;&#x4E2A;&#x6570;&#xFF0C;&#x4E4B;&#x524D;&#x662F;3
+                index = s.index;
+                //&#x83B7;&#x53D6;&#x5F53;&#x524D;&#x6700;&#x65B0;&#x503C;
+                o = s.value.get();
+                //&#x91CA;&#x653E;&#x9501;
+                lock.unlock();
+
+                emitting = o != null;
+                next = true;
+            }
+
+            if (o != null) {
+                //&#x8C03;&#x7528;test&#x65B9;&#x6CD5;
+                if (test(o)) {
+                    return;
+                }
+
+                emitLoop();
+            }
+        }
+</code></pre><pre><code>public boolean test(Object o) {
+    return cancelled || NotificationLite.accept(o, actual);
+}
+</code></pre><pre><code>public static &lt;T&gt; boolean accept(Object o, Observer&lt;? super T&gt; s) {
+    //&#x5224;&#x65AD;&#x5F53;&#x524D;&#x4E8B;&#x4EF6;&#x7C7B;&#x578B;&#xFF0C;&#x6839;&#x636E;&#x4E0D;&#x540C;&#x7C7B;&#x578B;&#x53D1;&#x5C04;onComplete/onErroe/onNext&#xFF0C;&#x8FD9;&#x91CC;&#x5C31;&#x628A;&#x4E4B;&#x524D;&#x6211;&#x4EEC;&#x6700;&#x540E;&#x53D1;&#x5C04;&#x7684;&#x90A3;&#x4E2A;onNext&#x53D1;&#x5C04;&#x51FA;&#x6765;&#x4E86;
+    if (o == COMPLETE) {
+        s.onComplete();
+        return true;
+    } else
+    if (o instanceof ErrorNotification) {
+        s.onError(((ErrorNotification)o).e);
+        return true;
+    }
+    s.onNext((T)o);
+    return false;
+}
+</code></pre><p>&#x53EA;&#x8981;&#x4E0A;&#x9762;&#x7684;&#x6267;&#x884C;&#x4E86;onComplete/onError&#xFF0C;&#x6216;&#x8005;&#x65AD;&#x6D41;&#xFF0C;&#x5219;&#x8FD9;&#x91CC;&#x5C31;&#x7ED3;&#x675F;&#x4E86;&#xFF0C;&#x5426;&#x5219;&#x8FD8;&#x6709;emitLoop</p>
+<pre><code>void emitLoop() {
+    for (;;) {
+        if (cancelled) {
+            return;
+        }
+        AppendOnlyLinkedArrayList&lt;Object&gt; q;
+        synchronized (this) {
+            q = queue;
+            if (q == null) {
+                emitting = false;
+                return;
+            }
+            queue = null;
+        }
+
+        q.forEachWhile(this);
+    }
+}
+</code></pre><pre><code>public void forEachWhile(NonThrowingPredicate&lt;? super T&gt; consumer) {
+    Object[] a = head;
+    final int c = capacity;
+    while (a != null) {
+        for (int i = 0; i &lt; c; i++) {
+            Object o = a[i];
+            if (o == null) {
+                break;
+            }
+            if (consumer.test((T)o)) {
+                break;
+            }
+        }
+        a = (Object[])a[c];
+    }
+}
+</code></pre><p>&#x8FD9;&#x4E00;&#x5757;&#x6682;&#x65F6;&#x770B;&#x4E0D;&#x51FA;&#x6765;&#x662F;&#x5E72;&#x5565;&#x7684;&#xFF0C;&#x5927;&#x6982;&#x610F;&#x601D;&#x5C31;&#x662F;for&#x5FAA;&#x73AF;&#x904D;&#x5386;&#x8FD9;&#x4E2A;queue&#xFF0C;&#x53D1;&#x5C04;onNext&#x4E8B;&#x4EF6;&#xFF0C;&#x8FD8;&#x6CA1;&#x641E;&#x61C2;&#x662F;&#x5E72;&#x561B;&#x7684;&#xFF1B;</p>
+<p>&#x518D;&#x5F80;&#x4E0B;&#x8D70;&#xFF0C;&#x53C8;&#x662F;3&#x4E2A;onNext</p>
+<pre><code>subject.onNext(&quot;4&quot;);
+subject.onNext(&quot;5&quot;);
+subject.onNext(&quot;6&quot;);
+</code></pre><p>&#x8FD9;&#x4E00;&#x6B21;&#x5C31;&#x4E3B;&#x8981;&#x770B;onNext&#x4E2D;&#x7684;for&#x5FAA;&#x73AF;&#x4E86;</p>
+<pre><code>for (BehaviorDisposable&lt;T&gt; bs : subscribers.get()) {
+    bs.emitNext(o, index);
+}
+</code></pre><p>&#x89E6;&#x53D1;&#x4E86;emitNext&#xFF1A;</p>
+<pre><code>void emitNext(Object value, long stateIndex) {
+    if (cancelled) {
+        return;
+    }
+    //&#x8FD9;&#x4E2A;fastPath&#xFF0C;&#x770B;&#x5230;&#x7684;&#x662F;&#xFF0C;&#x8FD9;&#x91CC;&#x9762;&#x7684;&#x65B9;&#x6CD5;&#x53EA;&#x6267;&#x884C;&#x4E86;&#x4E00;&#x6B21;&#xFF0C;&#x540E;&#x7EED;&#x5C31;&#x6267;&#x884C;&#x4E86;test&#x4E86;&#xFF0C;test&#x6211;&#x4EEC;&#x8BB2;&#x8FC7;&#x4E86;&#xFF0C;&#x548C;&#x4E4B;&#x524D;&#x4E00;&#x6837;&#xFF0C;&#x6839;&#x636E;&#x4E8B;&#x4EF6;&#x7C7B;&#x578B;&#x8C03;&#x7528;onComplete/onErrir/onNext
+    if (!fastPath) {
+        synchronized (this) {
+            if (cancelled) {
+                return;
+            }
+            //&#x8FD9;&#x91CC;index&#x5728;emitFirst&#x4E2D;&#x8FDB;&#x884C;&#x4E86;&#x8D4B;&#x503C;&#xFF0C;&#x8D4B;&#x503C;&#x5C31;&#x662F;&#x5728;&#x8BA2;&#x9605;&#x4E4B;&#x524D;&#x7684;&#x4E8B;&#x4EF6;&#x6570;&#x91CF;&#xFF0C;&#x800C;&#x540E;&#x7EED;&#x7684;stateIndex&#x662F;&#x5728;&#x8FD9;&#x4E2A;&#x7684;&#x57FA;&#x7840;&#x4E0A;&#x4E0D;&#x65AD;+1&#x7684;&#xFF0C;&#x6240;&#x4EE5;&#x6B63;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#x4E0D;&#x4F1A;&#x7B49;&#x4E8E;&#xFF0C;&#x90A3;&#x7B49;&#x4E8E;&#x662F;&#x4EC0;&#x4E48;&#x60C5;&#x51B5;&#x5462;&#xFF1F;
+            if (index == stateIndex) {
+                return;
+            }
+            //&#x8981;&#x6267;&#x884C;&#x91CC;&#x9762;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x5C31;&#x8981;emitting=true&#xFF0C;&#x4F46;&#x662F;&#x8981;&#x5B83;&#x4E3A;true&#xFF0C;&#x53EA;&#x6709;&#x4E00;&#x79CD;&#x53EF;&#x80FD;&#x5C31;&#x662F;&#x6211;&#x4EEC;onNext&#x4F20;&#x5165;&#x7684;&#x503C;&#x4E3A;null&#xFF0C;&#x4F46;&#x662F;&#x5982;&#x679C;&#x6211;&#x4EEC;&#x4F20;&#x5165;null&#xFF0C;&#x5728;onNext&#x4E2D;&#x4E00;&#x5F00;&#x59CB;&#x5C31;&#x4F1A;&#x629B;&#x51FA;&#x5F02;&#x5E38;&#xFF0C;&#x6240;&#x4EE5;&#x8FD9;&#x91CC;&#x6B63;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#x4E5F;&#x4E0D;&#x4F1A;&#x6267;&#x884C;&#x5230;&#xFF0C;&#x5982;&#x679C;&#x6267;&#x884C;&#x4E0D;&#x5230;&#x90A3;queue&#x7684;&#x5927;&#x5C0F;&#x5C31;&#x59CB;&#x7EC8;&#x662F;&#x7A7A;&#xFF0C;&#x90A3;&#x4E4B;&#x524D;&#x7684;&#x90A3;&#x4E2A;emitLoop&#x4E2D;&#x7684;&#x5FAA;&#x73AF;&#x5C31;&#x4E0D;&#x53EF;&#x80FD;&#x6267;&#x884C;&#x5230;&#x4E86;&#xFF1B;
+            //&#x6240;&#x4EE5;&#x8FD9;&#x8FDE;&#x7EED;&#x7684;&#x4E00;&#x5757;&#x5230;&#x5E95;&#x8868;&#x8FBE;&#x7684;&#x662F;&#x4EC0;&#x4E48;&#x610F;&#x601D;&#xFF0C;&#x8FD8;&#x4E0D;&#x592A;&#x61C2;&#xFF1B;
+            if (emitting) {
+                AppendOnlyLinkedArrayList&lt;Object&gt; q = queue;
+                if (q == null) {
+                    q = new AppendOnlyLinkedArrayList&lt;Object&gt;(4);
+                    queue = q;
+                }
+                q.add(value);
+                return;
+            }
+            next = true;
+        }
+        fastPath = true;
+    }
+
+    test(value);
+}
+</code></pre><p>&#x8FD9;&#x51E0;&#x4E2A;&#x5C5E;&#x6027;&#x8FD8;&#x662F;&#x5F88;&#x7591;&#x60D1;&#x4E0D;&#x77E5;&#x9053;&#x662F;&#x5E72;&#x5565;&#x7684;</p>
+<pre><code>boolean next;
+boolean emitting;
+AppendOnlyLinkedArrayList&lt;Object&gt; queue;
+boolean fastPath;
+long index;
 </code></pre><p><strong>PublishSubject</strong></p>
 <pre><code>final AtomicReference&lt;PublishDisposable&lt;T&gt;[]&gt; subscribers;
 static final PublishDisposable[] EMPTY = new PublishDisposable[0];
@@ -1355,7 +1747,7 @@ static {
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Rxjava2-Subject","level":"1.3.7","depth":2,"previous":{"title":"Rxjava2-Completable","level":"1.3.6","depth":2,"path":"RxJava2/Rxjava2-Completable.md","ref":"RxJava2/Rxjava2-Completable.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"RxJava2/Rxjava2-Subject.md","mtime":"2019-09-05T10:54:19.808Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-09-05T10:54:48.006Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Rxjava2-Subject","level":"1.3.7","depth":2,"previous":{"title":"Rxjava2-Completable","level":"1.3.6","depth":2,"path":"RxJava2/Rxjava2-Completable.md","ref":"RxJava2/Rxjava2-Completable.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["livereload"],"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"RxJava2/Rxjava2-Subject.md","mtime":"2019-09-06T03:53:40.830Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-09-06T03:54:10.586Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
@@ -1363,6 +1755,10 @@ static {
         
     <script src="../gitbook/gitbook.js"></script>
     <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-livereload/plugin.js"></script>
+        
     
         
         <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
