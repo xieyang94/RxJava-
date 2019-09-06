@@ -1648,6 +1648,114 @@ queue.offer(t);drain();->drainFused(Observer)/drainNormal(Observer)->onNext(T)�
 
 
 
+-----------------------2019/09/06----------------------------
+这个就不从开始创建讲起了，因为搞懂了一个，剩下的几个原理基本上大同小异；这里就拿最后一个说说：
+它是只允许一个观察者被订阅；
+这个上面也说过，它是通过一个原子标签，说白了就是一个布尔值来判断，订阅前先看看是否订阅过，没订阅就订阅，订阅完了把标签设置为true，这样后来者谁也订约不了；
+再说说他也是将订阅前和订阅后的数据全部发送的，所以它内部肯定也有一个容器装载每次发送的数据，然后再订阅的时候发送一波，订阅后，再发送事件直接发送；
+看看关键代码：
+
+```
+public void onNext(T t) {
+    ObjectHelper.requireNonNull(t, "onNext called with null. Null values are generally not allowed in 2.x operators and sources.");
+    if (done || disposed) {
+        return;
+    }
+    //这就是容器装载的证据
+    //final SpscLinkedArrayQueue<T> queue;
+    queue.offer(t);
+    //然后执行了了这个drain方法，这个我们可以推测一下：没订阅前不能发送且只有一个订阅，就凭这俩条件就可以判断出，肯定是判断是否有订阅者，或者根据那个标签来判断是否发送事件的；
+    drain();
+}
+```
+```
+    void drain() {
+        if (wip.getAndIncrement() != 0) {
+            return;
+        }
+        //拿到订阅者
+        Observer<? super T> a = actual.get();
+        int missed = 1;
+
+        for (;;) {
+            //判断是否有观察者，这里就将onNext没订阅之前发射不出来间隔开了
+            if (a != null) {
+                //这个enableOperatorFusion只有在requestFusion方法中才有可能被设置为true；但是我们暂时没用到这个方法；不过可以猜测，无非这又是一个什么规则，然后再发射事件的基础上加上这个规则；
+                if (enableOperatorFusion) {
+                    drainFused(a);
+                } else {
+                    //目前走的是这个方法
+                    drainNormal(a);
+                }
+                return;
+            }
+
+            missed = wip.addAndGet(-missed);
+            if (missed == 0) {
+                break;
+            }
+
+            a = actual.get();
+        }
+    }
+```
+
+```
+    void drainNormal(Observer<? super T> a) {
+        int missed = 1;
+        SimpleQueue<T> q = queue;
+        boolean failFast = !this.delayError;
+        boolean canBeError = true;
+        for (;;) {
+            for (;;) {
+
+                if (disposed) {
+                    actual.lazySet(null);
+                    q.clear();
+                    return;
+                }
+
+                boolean d = this.done;
+                //这个容器看名字就知道是队列类型的，先进先出
+                T v = queue.poll();
+                //这个empty用来判断是否队列中还有数据
+                boolean empty = v == null;
+
+                if (d) {
+                    if (failFast && canBeError) {
+                        if (failedFast(q, a)) {
+                            return;
+                        } else {
+                            canBeError = false;
+                        }
+                    }
+                    //在d=true的情况下进来的，这个应该比较熟了，onComplete/onError的时候
+                    if (empty) {
+                        //没数据了就去调用onError/onComplete
+                        //这个方法里面的代码就更简单了，有错就调用onError，没错就调用onComplete
+                        errorOrComplete(a);
+                        return;
+                    }
+                }
+                //空了就跳出来
+                if (empty) {
+                    break;
+                }
+                //不为空则直接发送onNext事件，因为队列的先进先出的规则，所以顺序不会乱
+                a.onNext(v);
+            }
+
+            missed = wip.addAndGet(-missed);
+            if (missed == 0) {
+                break;
+            }
+        }
+    }
+
+```
+
+
+
 ---
 
 [1]: http://static.zybuluo.com/xiey/9nvtii60x9h6lo1cxea05fz7/1111111111.png
